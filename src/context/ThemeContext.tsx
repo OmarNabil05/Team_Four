@@ -19,17 +19,26 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const persisted = window.localStorage.getItem(THEME_KEY) as ThemeMode | null;
     if (persisted === 'light' || persisted === 'dark') {
       setMode(persisted);
+    } else {
+      // تنظيف القيم القديمة
+      window.localStorage.removeItem('theme');
+      window.localStorage.removeItem('darkMode');
     }
   }, []);
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    const body = window.document.body;
     if (mode === 'dark') {
-      root.classList.add('dark');
+      body.classList.remove('light');
+      body.classList.add('dark');
     } else {
-      root.classList.remove('dark');
+      body.classList.remove('dark');
+      body.classList.add('light');
     }
     window.localStorage.setItem(THEME_KEY, mode);
+    
+    window.localStorage.removeItem('theme');
+    window.localStorage.removeItem('darkMode');
   }, [mode]);
 
   const value = useMemo(

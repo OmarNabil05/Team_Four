@@ -17,17 +17,18 @@ export const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md">
+<header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/5 border-b border-white/10 dark:bg-transparent dark:border-white/10">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
-        <Link to="/" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-accent">
-            <span className="font-display text-2xl tracking-wider">S</span>
-          </div>
-          <div>
-            <p className="font-display text-2xl uppercase tracking-[0.3em] text-white">Spot</p>
-            <p className="text-xs uppercase tracking-[0.4em] text-accent/70">Fine Dining</p>
-          </div>
-        </Link>
+       <Link to="/" className="flex items-center gap-3">
+  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-accent">
+    <span className="font-display text-2xl tracking-wider">S</span>
+  </div>
+  <div>
+    <p className="font-display text-2xl uppercase tracking-[0.3em] text-gray-900 dark:text-white">Spot</p>
+    <p className="text-xs uppercase tracking-[0.4em] text-accent/70">Fine Dining</p>
+  </div>
+</Link>
+
 
         <nav className="hidden items-center gap-10 lg:flex">
           {links.map((link) => (

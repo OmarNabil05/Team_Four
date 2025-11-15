@@ -7,19 +7,101 @@
   scroll-behavior: smooth;
 }
 
+/* Dark Mode (Default) */
 body {
   @apply bg-night text-white antialiased;
-  background-image: linear-gradient(180deg, rgba(11, 13, 16, 0.96), rgba(11, 13, 16, 0.98)),
+  background-image: linear-gradient(180deg, rgba(11,13,16,0.96), rgba(11,13,16,0.98)),
     url('https://images.unsplash.com/photo-1563371351-e53ebb744a1b?auto=format&fit=crop&w=1600&q=80');
   background-attachment: fixed;
   background-size: cover;
   background-repeat: no-repeat;
 }
 
+/* Light Mode */
+body.light {
+  @apply bg-gray-50 text-gray-900 antialiased;
+  background-image: linear-gradient(180deg, rgba(248,250,252,0.95), rgba(241,245,249,0.97)),
+    url('https://images.unsplash.com/photo-1563371351-e53ebb744a1b?auto=format&fit=crop&w=1600&q=80');
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Glass effect */
 .glass-sheen {
   @apply bg-white/5 backdrop-blur-lg border border-white/10 shadow-glow-gold;
 }
 
+body.light .glass-sheen {
+  @apply bg-gray-100/80 backdrop-blur-lg border border-gray-300/50 shadow-lg;
+}
+
+/* Header/Navbar Light Mode */
+body.light header {
+  @apply bg-white/80 backdrop-blur-md border-b border-gray-200;
+}
+
+/* Text Colors Light Mode */
+body.light .text-white {
+  @apply text-gray-900;
+}
+
+body.light .text-white-70 {
+  @apply text-gray-600;
+}
+
+/* Background & Borders Light Mode */
+body.light .bg-nightLight-95 {
+  @apply bg-gray-100/95;
+}
+
+body.light .border-white-10 {
+  @apply border-gray-300/30;
+}
+
+body.light .bg-white-5 {
+  @apply bg-gray-900/5;
+}
+
+body.light .hover-bg-white-10:hover {
+  @apply hover:bg-gray-900/10;
+}
+
+/* Gold Gradient */
 .gold-gradient {
   background: linear-gradient(135deg, #c59d5f 0%, #e4c48a 50%, #a3753b 100%);
+}
+
+/* Grid Overlay Light Mode */
+body.light .bg-grid-overlay {
+  background-image: 
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+}
+
+/* Gradient Overlay Light Mode */
+body.light .bg-gradient-to-b {
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 40%, rgba(0,0,0,0.1) 100%);
+}
+
+/* Buttons & Accent Colors Light Mode */
+body.light .border-accent-60 {
+  @apply border-amber-600/60;
+}
+
+body.light .bg-accent-20 {
+  @apply bg-amber-500/20;
+}
+
+body.light .text-accent {
+  @apply text-amber-700;
+}
+
+body.light .hover-bg-accent-30:hover {
+  @apply hover:bg-amber-500/30;
+}
+
+/* Shadow adjustments Light Mode */
+body.light .shadow-glow-gold {
+  box-shadow: 0 0 20px rgba(197,157,95,0.3);
 }

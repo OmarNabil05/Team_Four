@@ -50,12 +50,13 @@ export const MenuPage = () => {
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-6xl px-6 py-16 lg:px-10">
-        <SectionHeading
-          eyebrow="Seasonal Menu"
-          title="An ode to midnight decadence"
-          description="Each course is meticulously crafted from rare ingredients, designed to be savored and remembered."
-        />
+<section className="mx-auto max-w-6xl px-6 py-16 lg:px-10">
+  <SectionHeading
+    eyebrow="قائمة الموسم"
+    title="متعة الطعم الفاخر"
+    description="كل طبق معمول بعناية من مكونات مميزة، عشان تتاكل وتفضل في ذهنك."
+  />
+
 
         <div className="mt-10 flex flex-wrap gap-3">
           {(['All', ...categoryOrder] as const).map((category) => (
@@ -91,8 +92,7 @@ export const MenuPage = () => {
                     <motion.article
                       key={item._id}
                       initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.3 }}
+animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.5 }}
                       className="flex gap-6 rounded-3xl border border-white/10 bg-white/5 p-6"
                     >

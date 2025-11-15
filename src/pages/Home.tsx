@@ -1,62 +1,69 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button } from '../components/ui/Button';
-import { PageTransition } from '../components/common/PageTransition';
-import { SectionHeading } from '../components/common/SectionHeading';
-import type { MenuItem } from '../types';
-import { fetchMenu } from '../services/menuService';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button } from "../components/ui/Button";
+import { PageTransition } from "../components/common/PageTransition";
+import { SectionHeading } from "../components/common/SectionHeading";
+import type { MenuItem } from "../types";
+import { fetchMenu } from "../services/menuService";
+import bg1 from "../assets/imgs/bg1.webp";
+import chef from "../assets/imgs/chef.jpg";
+import steak from "../assets/imgs/steak.jpg";
+import Appetizers from "../assets/imgs/Appetizers.jpg";
+import dessert from "../assets/imgs/dessert.jpg";
 
 const ambianceHighlights = [
   {
-    title: 'Culinary Theatre',
-    description:
-      'Chef Adrien and his brigade craft plates to order in an open hearth kitchen framed by marble and brass.',
+    title: "مسرح الطهي",
+    description: "الأطباق بيتحضّروا قدامك في مطبخ مفتوح، محاط بالرخام والنحاس.",
   },
   {
-    title: 'Sommelier-Curated Cellar',
+    title: "تجارب خاصة",
     description:
-      'A library of over 450 labels, including rare vintages and small-batch producers from Burgundy to Yamanashi.',
+      "منيوهات تذوّق وكوكتيلات معمولة مخصوص ليك في لاونج صغير بعشر كراسي وإطلالة على أفق المدينة.",
   },
   {
-    title: 'Private Experiences',
+    title: "أجواء مميزة",
     description:
-      'Tailored tasting menus and mixology pairings in an intimate ten-seat lounge overlooking the city skyline.',
+      "مكان بيعكس أناقة التصميم والتفاصيل الصغيرة اللي بتخلي كل لحظة فيه تجربة مختلفة.",
   },
 ];
 
 const fallbackFeatured: MenuItem[] = [
   {
-    _id: '1',
-    title: 'Smoked Wagyu Tenderloin',
-    description: 'Miso-glazed wagyu with charred broccolini and black garlic jus.',
-    price: 58,
-    category: 'Main Courses',
-    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmHuIol1dDL3V43y1l5NcK3_qJeUMZ8Jy02w&s',
+    _id: "1",
+    title: "شرائح لحمة تندرلوين بصوص الديمي جلاس",
+    description:
+      "شرائح لحمة تندرلوين مشوية ومتبلة صح، بتتقدم مع صوص ديمي جلاس تقيل ورشة ملح بحر، ومتزينة بأعشاب فريش وبصلة صغيرة متكرملة.",
+    price: 580,
+    category: "Main Courses",
+    imageUrl: steak,
     isFeatured: true,
     isAvailable: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
-    _id: '2',
-    title: 'Truffle Arancini',
-    description: 'Crispy risotto spheres with aged parmesan and black truffle aioli.',
-    price: 18,
-    category: 'Appetizers',
-    imageUrl: 'https://www.filippoberio.co.uk/wp-content/uploads/2022/01/truffle-arrancini-recipe.jpg',
+    _id: "2",
+    title: "كور الأرز المقرمشة بصوص الأيولي",
+    description:
+      "كور أرز مقلية ومغلفة بالبقسماط ومحشية جبنة، بتتقدم مع صوص أيولي بالمسطردة والأعشاب الطازة.",
+    price: 180,
+    category: "Appetizers",
+    imageUrl: Appetizers,
     isFeatured: true,
     isAvailable: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
-    _id: '3',
-    title: 'Dark Chocolate Marquise',
-    description: 'Valrhona mousse with burnt orange gel and pistachio praline.',
-    price: 16,
-    category: 'Desserts',
-    imageUrl: 'https://hedgecombers.com/wp-content/uploads/2014/05/Chocolate-Marquise-9898.jpg',
+    _id: "3",
+    title: "جاتوه الأوبرا (Opera Cake)",
+    description:
+      "طبقات من كيك اللوز الخفيف، وكريمة الزبدة بطعم القهوة، وشوكولاتة غاناش غامقة، ومتغطية بطبقة شوكولاتة بتلمع.",
+    price: 160,
+    category: "Desserts",
+    imageUrl: dessert,
     isFeatured: true,
     isAvailable: true,
     createdAt: new Date().toISOString(),
@@ -76,7 +83,7 @@ export const HomePage = () => {
           setFeatured(highlighted);
         }
       } catch (error) {
-        console.error('Unable to load menu highlights', error);
+        console.error("Unable to load menu highlights", error);
       }
     };
 
@@ -89,49 +96,53 @@ export const HomePage = () => {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-night" />
           <img
-            src="https://images.unsplash.com/photo-1528605105345-5344ea20e269?auto=format&fit=crop&w=1600&q=80"
+            src={bg1}
             alt="Spot restaurant interior"
             className="h-full w-full object-cover"
             loading="lazy"
           />
         </div>
         <div className="relative mx-auto flex min-h-[80vh] max-w-6xl flex-col items-start justify-center gap-8 px-6 py-32 lg:px-10">
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-xs uppercase tracking-[0.5em] text-accent"
-          >
-            Experience Spot
-          </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.7 }}
-            className="font-display text-5xl leading-tight tracking-wide text-white sm:text-6xl lg:text-7xl"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="text-4xl uppercase tracking-[0.5em] text-accent"
           >
-            Where Gastronomy Meets Golden Hour Elegance
+            عيش لحظة سبوت
           </motion.h1>
-          <motion.p
+          <motion.h2
             initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.7 }}
-            className="max-w-2xl text-lg text-white/70"
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
+            className=" text-3xl leading-tight tracking-wide text-white sm:text-6xl lg:text-7xl"
           >
-            Spot is an ode to modern dining, weaving fire-kissed cuisine, bespoke cocktails, and magnetic
-            city energy into every evening. Reserve your moment.
-          </motion.p>
+            لما الأكل الراقي يقابل لحظة الغروب الساحرة{" "}
+          </motion.h2>
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6, duration: 0.7 }}
+            className=" text-2xl text-white/70"
+          >
+            سبوت بيقدّم لك أكل معمول بشغف، نكهات مشوية بالنار، وكوكتيلات مخصوص
+            ليك… كله في أجواء راقية. جرّب بنفسك.
+          </motion.h2>
           <motion.div
             initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8, duration: 0.7 }}
             className="flex flex-wrap items-center gap-4"
           >
             <Button asChild>
-              <Link to="/menu">View Menu</Link>
+              <Link to="/menu">
+                <span className=" text-2xl ">المنيو</span>
+              </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/reservations">Book a Table</Link>
+              <Link to="/reservations">
+                <span className=" text-2xl ">احجز دلوقتي</span>
+              </Link>
             </Button>
           </motion.div>
         </div>
@@ -140,22 +151,23 @@ export const HomePage = () => {
       <section className="relative z-10 mx-auto -mt-16 max-w-6xl px-6 lg:px-10">
         <div className="glass-sheen rounded-3xl p-8 shadow-2xl sm:p-12">
           <SectionHeading
-            eyebrow="Signature Moments"
-            title="A destination for celebration, connection, and timeless evenings"
-            description="Indulge in tasting menus that evolve with the seasons, cocktails perfumed with house-made bitters, and service that anticipates your desires."
+            eyebrow="لحظات بطعم تاني"
+            title="مكان للّمة والاحتفال وسهرات مالهاش زي"
+            description="عيش تجربة أكل بتتجدّد على طول، ونكهات معمولة بإتقان، وخدمة فاهمة ذوقك قبل ما تتكلم."
           />
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             {ambianceHighlights.map((highlight) => (
               <motion.div
                 key={highlight.title}
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
                 className="rounded-3xl border border-white/10 bg-white/5 p-6"
               >
-                <h3 className="font-display text-2xl text-white">{highlight.title}</h3>
-                <p className="mt-3 text-sm text-white/60">{highlight.description}</p>
+                <h3 className=" text-2xl text-white">{highlight.title}</h3>
+                <p className="mt-3 text-xl text-white/60">
+                  {highlight.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -164,17 +176,16 @@ export const HomePage = () => {
 
       <section className="mx-auto mt-24 max-w-6xl px-6 lg:px-10">
         <SectionHeading
-          eyebrow="Featured Plates"
-          title="Our most coveted dishes"
-          description="Each dish is artfully plated and finished tableside, highlighting rare ingredients sourced from artisans we trust."
+          eyebrow="أطباق مميزة"
+          title="أشهى أطباقنا"
+          description="كل طبق متقدّم بشكل فني وبيتجهّز قدامك على الترابيزة، مع إبراز مكونات نادرة جايه من صناع موثوق فيهم."
         />
         <div className="mt-12 grid gap-10 md:grid-cols-2">
           {featured.map((item) => (
             <motion.article
               key={item._id}
               initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 sm:flex"
             >
@@ -188,16 +199,26 @@ export const HomePage = () => {
               </div>
               <div className="flex flex-1 flex-col gap-4 p-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-[0.3em] text-accent/80">{item.category}</span>
-                  <span className="font-semibold text-accent">${item.price.toFixed(2)}</span>
+                  <span className="text-xs uppercase tracking-[0.3em] text-accent/80">
+                    {item.category}
+                  </span>
+                  <div>
+                    {" "}
+                    <span className="font-semibold text-accent">
+                      {item.price.toFixed(0)}
+                    </span>
+                    <span className="font-semibold text-accent">EGP</span>
+                  </div>
                 </div>
-                <h3 className="font-display text-2xl text-white">{item.title}</h3>
+                <h3 className="font-display text-2xl text-white">
+                  {item.title}
+                </h3>
                 <p className="text-sm text-white/65">{item.description}</p>
                 <Link
                   to="/menu"
                   className="mt-auto text-sm uppercase tracking-[0.3em] text-accent transition hover:text-accent/70"
                 >
-                  View full pairing →
+                  اكتشف نكهة المكان ←
                 </Link>
               </div>
             </motion.article>
@@ -210,36 +231,35 @@ export const HomePage = () => {
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 lg:grid-cols-2 lg:px-10">
           <motion.div
             initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
             <SectionHeading
               align="left"
-              eyebrow="Chef Adrien Delacroix"
-              title="Crafting memories beyond the plate"
-              description="With a decade at Michelin-starred institutions, Chef Adrien leads Spot with a philosophy rooted in fire, seasonality, and narrative."
+              eyebrow="الشيف كريم محمود"
+              title="صنع ذكريات تتعدى الطبق"
+              description="بعد أكتر من عشر سنين في مطاعم مصرية وعالمية، الشيف كريم بيقود Spot بفلسفة مبنية على النار، المواسم، وقصة ورا كل طبق."
             />
             <p className="text-sm text-white/70">
-              Our culinary team works in tandem with local farms and global purveyors to deliver produce at its
-              peak. Expect five to seven-course tasting journeys, chef&apos;s counter engagements, and rare wine
-              pairings guided by our sommeliers.
+              فريقنا في المطبخ بيشتغل مع المزارع المحلية والموردين الموثوق فيهم
+              عشان يقدموا أفضل المنتجات وقتها. استعد لرحلات تذوّق من ٥ لـ٧
+              أطباق، وتفاعل مباشر مع الشيف، وتجارب مميزة مع مشروبات مختارة
+              بعناية.
             </p>
             <Button asChild>
-              <Link to="/about">Discover Our Story</Link>
+              <Link to="/about">اعرف حكيتنا</Link>
             </Button>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="glass-sheen overflow-hidden rounded-3xl"
           >
             <img
-              src="https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=1200&q=80"
-              alt="Chef plating a dish"
+              src={chef}
+              alt="الشيف بيقدّم طبق"
               className="h-full w-full object-cover"
               loading="lazy"
             />
@@ -253,20 +273,20 @@ export const HomePage = () => {
           <div className="relative max-w-2xl space-y-6">
             <SectionHeading
               align="left"
-              eyebrow="Reserve"
-              title="Secure your evening at Spot"
-              description="Limited seatings each night ensure every detail receives attention."
+              eyebrow="الحجز"
+              title="احجز سهرتك في Spot"
+              description="عدد المقاعد محدود كل ليلة عشان كل التفاصيل تاخد حقها من الاهتمام."
             />
-            <p className="text-sm text-white/70">
-              We accommodate dietary preferences, private events, and curated celebrations. Our concierge will
-              confirm every reservation personally.
+            <p className="text-lg text-white/70">
+              بنلبي احتياجات النظام الغذائي، الفعاليات الخاصة، والاحتفالات
+              المخصصة. موظفينا هيتأكد من كل حجز شخصيًا.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button asChild>
-                <Link to="/reservations">Reserve Now</Link>
+                <Link to="/reservations">احجز دلوقتي</Link>
               </Button>
               <Button variant="ghost" asChild>
-                <Link to="/contact">Contact Concierge</Link>
+                <Link to="/contact">تواصل مع المسؤول</Link>
               </Button>
             </div>
           </div>

@@ -1,23 +1,10 @@
 import axios from 'axios';
-import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
 import env from '../config/env';
-
-let authToken: string | null = null;
-
-export const setAuthToken = (token: string | null) => {
-  authToken = token;
-};
 
 export const api = axios.create({
   baseURL: env.apiUrl,
   timeout: 15000,
-});
-
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  if (authToken) {
-    config.headers.Authorization = `Bearer ${authToken}`;
-  }
-  return config;
 });
 
 api.interceptors.response.use(

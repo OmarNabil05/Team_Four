@@ -1,34 +1,33 @@
-import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import clsx from 'clsx';
-import { ThemeToggle } from '../common/ThemeToggle';
+import { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import logo from "../../assets/imgs/logo.png";
+import clsx from "clsx";
 
 const links = [
-  { label: 'Home', to: '/' },
-  { label: 'About', to: '/about' },
-  { label: 'Menu', to: '/menu' },
-  { label: 'Reservations', to: '/reservations' },
-  { label: 'Contact', to: '/contact' },
-  { label: 'Admin', to: '/admin' },
+  { label: "الصفحة الرئيسية", to: "/" },
+  { label: "مين إحنا", to: "/about" },
+  { label: "المنيو", to: "/menu" },
+  { label: "الحجز", to: "/reservations" },
+  { label: "كلمنا", to: "/contact" },
 ];
 
-export const Navbar = () => {
+export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-<header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/5 border-b border-white/10 dark:bg-transparent dark:border-white/10">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
-       <Link to="/" className="flex items-center gap-3">
-  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-accent">
-    <span className="font-display text-2xl tracking-wider">S</span>
-  </div>
-  <div>
-    <p className="font-display text-2xl uppercase tracking-[0.3em] text-gray-900 dark:text-white">Spot</p>
-    <p className="text-xs uppercase tracking-[0.4em] text-accent/70">Fine Dining</p>
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/5 border-b border-white/10 bg-transparent border-white/10 ">
+     
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 lg:px-10">
+<Link to="/" className="flex items-center gap-3">
+<div className="flex h-16 w-20 items-center justify-center overflow-hidden">
+    <img
+      src={logo}
+      alt=""
+      className="block w-full h-full object-cover"
+    />
   </div>
 </Link>
-
 
         <nav className="hidden items-center gap-10 lg:flex">
           {links.map((link) => (
@@ -37,8 +36,8 @@ export const Navbar = () => {
               to={link.to}
               className={({ isActive }: { isActive: boolean }) =>
                 clsx(
-                  'text-sm uppercase tracking-[0.3em] transition hover:text-accent',
-                  isActive ? 'text-accent' : 'text-white/70',
+                  "text-lg uppercase tracking-[0.3em] transition hover:text-accent",
+                  isActive ? "text-accent" : "text-white/70",
                 )
               }
             >
@@ -48,12 +47,11 @@ export const Navbar = () => {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <ThemeToggle />
           <Link
             to="/reservations"
             className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/60 bg-accent/20 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-accent shadow-glow-gold transition hover:bg-accent/30"
           >
-            Book a Table
+            احجز دلوقتي
           </Link>
         </div>
 
@@ -93,8 +91,10 @@ export const Navbar = () => {
                   onClick={() => setOpen(false)}
                   className={({ isActive }: { isActive: boolean }) =>
                     clsx(
-                      'block rounded-full px-4 py-3 text-center text-sm uppercase tracking-[0.3em] transition',
-                      isActive ? 'bg-accent/20 text-accent' : 'text-white/80 hover:bg-white/10',
+                      "block rounded-full px-4 py-3 text-center text-sm uppercase tracking-[0.3em] transition",
+                      isActive
+                        ? "bg-accent/20 text-accent"
+                        : "text-white/80 hover:bg-white/10",
                     )
                   }
                 >
@@ -102,13 +102,12 @@ export const Navbar = () => {
                 </NavLink>
               ))}
               <div className="flex items-center justify-between rounded-2xl border border-white/10 p-4">
-                <ThemeToggle />
                 <Link
                   to="/reservations"
                   onClick={() => setOpen(false)}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/60 bg-accent/20 px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent shadow-glow-gold transition hover:bg-accent/30"
                 >
-                  Book a Table
+                  احجز دلوقتي{" "}
                 </Link>
               </div>
             </div>
@@ -117,4 +116,4 @@ export const Navbar = () => {
       </AnimatePresence>
     </header>
   );
-};
+}

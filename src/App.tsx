@@ -9,7 +9,6 @@ import { AboutPage } from './pages/About';
 import { MenuPage } from './pages/Menu';
 import { ReservationsPage } from './pages/Reservations';
 import { ContactPage } from './pages/Contact';
-import { AdminPage } from './pages/Admin';
 
 const App = () => {
   const location = useLocation();
@@ -28,7 +27,6 @@ const App = () => {
             <Route path="/menu" element={<MenuPage />} />
             <Route path="/reservations" element={<ReservationsPage />} />
             <Route path="/contact" element={<ContactPage />} />
-            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </AnimatePresence>
       </main>

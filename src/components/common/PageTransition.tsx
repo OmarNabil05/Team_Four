@@ -13,7 +13,7 @@ export const PageTransition = ({ children }: { children: ReactNode }) => {
       initial={transition.initial}
       animate={transition.animate}
       exit={transition.exit}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       className="relative"
     >
       {children}

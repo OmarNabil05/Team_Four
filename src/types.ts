@@ -1,34 +1,41 @@
-export type MenuCategory = 'Appetizers' | 'Main Courses' | 'Desserts' | 'Drinks';
+export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
-export type MenuItem = {
-  _id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: MenuCategory;
-  imageUrl: string;
-  isFeatured: boolean;
-  isAvailable: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type MenuItemInput = Omit<MenuItem, '_id' | 'createdAt' | 'updatedAt'>;
-
-export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled';
-
-export type Reservation = {
-  _id: string;
+export type ReservationInput = {
   name: string;
   email: string;
   phone: string;
   date: string;
   time: string;
   guests: number;
-  message?: string;
+  message: string;
+  // New fields based on user request
+  endTime?: string; // For time range
+  tableClass?: 'A' | 'B' | 'C' | 'D'; // For table type/class
+};
+
+export type Reservation = {
+  id: string;
+  userId: string;
+  tableId: string;
   status: ReservationStatus;
   createdAt: string;
   updatedAt: string;
+} & ReservationInput;
+
+export type TableClass = 'A' | 'B' | 'C' | 'D';
+
+export type Table = {
+  id: string;
+  name: string;
+  capacity: number;
+  class: TableClass;
+  isAvailable: boolean;
 };
 
-export type ReservationInput = Omit<Reservation, '_id' | 'status' | 'createdAt' | 'updatedAt'>;
+export type AvailableTableSearch = {
+  date: string;
+  startTime: string;
+  endTime: string;
+  guests: number;
+  tableClass?: TableClass;
+};

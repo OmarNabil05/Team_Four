@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { PageTransition } from "../components/common/PageTransition";
 import { SectionHeading } from "../components/common/SectionHeading";
 import VID from "../assets/vid/bg.mp4";
+import chefImgK from "../assets/imgs/chef1.jpg";
 
 const milestones = [
   {
@@ -116,7 +117,7 @@ export const AboutPage = () => {
             className="glass-sheen overflow-hidden rounded-3xl"
           >
             <img
-              src="https://cdn-bnklg.nitrocdn.com/WQiharaAoSUWjdmYdQaoZKLXawgJIPOR/assets/images/source/rev-0a84595/www.upmenu.com/wp-content/uploads/2023/10/executive-chef-job-description-cover-photo-1024x731.jpg.webp"
+              src={chefImgK}
               alt="Chef Kareem Mahmoud"
               className="h-full w-full object-cover"
               loading="lazy"

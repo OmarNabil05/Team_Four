@@ -54,7 +54,7 @@ export const ContactPage = () => {
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-animate={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
@@ -65,8 +65,8 @@ animate={{ opacity: 1, x: 0 }}
               description="سواء ناويين تعملوا مناسبة صغيرة، إحنا هنا عشان نساعدكم."
             />
 
-            <div className="glass-sheen rounded-3xl p-8">
-              <div className="space-y-4 text-sm text-white/70">
+            <div className="glass-sheen rounded-3xl p-8  ">
+              <div className="space-y-4 text-sm text-white/70 ">
                 <p>
                   <span className="block text-xs uppercase tracking-[0.3em] text-accent/80">
                     Phone
@@ -125,7 +125,7 @@ animate={{ opacity: 1, x: 0 }}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-animate={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="glass-sheen rounded-3xl p-10"
           >
@@ -140,7 +140,7 @@ animate={{ opacity: 1, x: 0 }}
                     onChange={(event) =>
                       handleChange("name", event.target.value)
                     }
-                    className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+                    className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
                   />
                 </label>
                 <label className="space-y-2 text-sm text-white/70">
@@ -152,7 +152,7 @@ animate={{ opacity: 1, x: 0 }}
                     onChange={(event) =>
                       handleChange("email", event.target.value)
                     }
-                    className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+                    className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
                   />
                 </label>
               </div>
@@ -165,7 +165,7 @@ animate={{ opacity: 1, x: 0 }}
                   onChange={(event) =>
                     handleChange("phone", event.target.value)
                   }
-                  className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+                  className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
                 />
               </label>
 
@@ -178,11 +178,11 @@ animate={{ opacity: 1, x: 0 }}
                   onChange={(event) =>
                     handleChange("subject", event.target.value)
                   }
-                  className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+                  className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
                 />
               </label>
 
-              <label className="space-y-2 text-sm text-white/70">
+              <label className="space-y-2  text-sm text-white/70">
                 ازاي نقدر نساعدك؟{" "}
                 <textarea
                   required
@@ -191,7 +191,7 @@ animate={{ opacity: 1, x: 0 }}
                   onChange={(event) =>
                     handleChange("message", event.target.value)
                   }
-                  className="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+                  className="w-full my-2 rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
                 />
               </label>
 

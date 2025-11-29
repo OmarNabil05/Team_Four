@@ -603,9 +603,9 @@ export const ReservationsPage = () => {
   };
 
   const renderSearchForm = () => (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <label className="space-y-2 text-sm text-white/70">
+        <label className=" text-sm text-white/70">
           التاريخ
           <input
             type="date"
@@ -613,10 +613,10 @@ export const ReservationsPage = () => {
             required
             value={searchForm.date}
             onChange={(event) => handleSearchChange("date", event.target.value)}
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
           />
         </label>
-        <label className="space-y-2 text-sm text-white/70">
+        <label className=" text-sm text-white/70">
           عدد الأفراد
           <input
             type="number"
@@ -627,10 +627,10 @@ export const ReservationsPage = () => {
             onChange={(event) =>
               handleSearchChange("guests", Number(event.target.value))
             }
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
           />
         </label>
-        <label className="space-y-2 text-sm text-white/70">
+        <label className=" text-sm text-white/70">
           من وقت
           <select
             required
@@ -638,7 +638,7 @@ export const ReservationsPage = () => {
             onChange={(event) =>
               handleSearchChange("startTime", event.target.value)
             }
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
           >
             {timeSlots.map((slot) => (
               <option key={slot} value={slot} className="bg-night">
@@ -655,7 +655,7 @@ export const ReservationsPage = () => {
             onChange={(event) =>
               handleSearchChange("endTime", event.target.value)
             }
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
           >
             {timeSlots.map((slot) => (
               <option key={slot} value={slot} className="bg-night">
@@ -665,7 +665,7 @@ export const ReservationsPage = () => {
           </select>
         </label>
       </div>
-      <label className="space-y-2 text-sm text-white/70">
+      <label className=" text-sm  text-white/70 ">
         نوع الطاولة (اختياري)
         <select
           value={searchForm.tableClass || ""}
@@ -675,7 +675,7 @@ export const ReservationsPage = () => {
               event.target.value as TableClass | undefined
             )
           }
-          className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
+          className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0 my-2"
         >
           <option value="">كل الأنواع</option>
           {tableClasses.map((cls) => (
@@ -1024,7 +1024,7 @@ export const ReservationsPage = () => {
                 eyebrow="الكونسيرج"
                 title="بنجهزلك أمسيات على حسب ذوقك"
               />
-              <p className="mt-4 text-sm text-white/70">
+              <p className="mt-7 text-sm text-white/70">
                 تحب تتكلم مع حد من فريقنا؟ اتصل على
                 <a
                   href="https://wa.me/201234567890"

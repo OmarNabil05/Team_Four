@@ -6,14 +6,15 @@ import { SectionHeading } from "../components/common/SectionHeading";
 import { Button } from "../components/ui/Button";
 import type {
   ReservationInput,
-  Table,
+  TableItem,
   AvailableTableSearch,
   Reservation,
   TableClass,
 } from "../types";
 import clsx from "clsx";
+import { fetchTables,fetchUserReservations,updateReservation,cancelReservation } from "../services/reservationService";
+import env from "../config/env";
 
-// === الداتا الوهمية ===
 
 // أيقونات بديلة
 const TableIcon = ({ className }: { className?: string }) => (
@@ -52,134 +53,30 @@ const TrashIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const CheckCircleIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
+// eslint-disable-next-line react-refresh/only-export-components
+export const fetchAvailableTables = async (search: AvailableTableSearch): Promise<TableItem[]> => {
+  const tables = await fetchTables();
 
-// الداتا الوهمية للطاولات
-const MOCK_TABLES: Table[] = [
-  { id: "1", name: "طاولة A1", class: "A", capacity: 4, isAvailable: true },
-  { id: "2", name: "طاولة A2", class: "A", capacity: 4, isAvailable: true },
-  { id: "3", name: "طاولة A3", class: "A", capacity: 4, isAvailable: false },
-  { id: "4", name: "طاولة B1", class: "B", capacity: 6, isAvailable: true },
-  { id: "5", name: "طاولة B2", class: "B", capacity: 6, isAvailable: true },
-  { id: "6", name: "طاولة C1", class: "C", capacity: 8, isAvailable: true },
-  { id: "7", name: "طاولة C2", class: "C", capacity: 8, isAvailable: true },
-  { id: "8", name: "طاولة VIP1", class: "D", capacity: 12, isAvailable: true },
-  { id: "9", name: "طاولة VIP2", class: "D", capacity: 10, isAvailable: false },
-];
+  return tables.filter(table => {
+    if (table.maxSeats < search.guests) return false;
+    if (search.tableClass && table.category !== search.tableClass) return false;
+    if (table.reserved) return false;
 
-// الداتا الوهمية للحجوزات
-let MOCK_RESERVATIONS: Reservation[] = [
-  {
-    id: "1",
-    tableId: "1",
-    name: "أحمد محمد",
-    email: "ahmed@example.com",
-    phone: "01234567890",
-    date: new Date().toISOString().split("T")[0],
-    time: "07:00 PM",
-    endTime: "09:00 PM",
-    guests: 3,
-    message: "مناسبة عائلية",
-    tableClass: "A",
-    status: "confirmed"
-  },
-  {
-    id: "2",
-    tableId: "4",
-    name: "فاطمة علي",
-    email: "fatima@example.com",
-    phone: "01234567891",
-    date: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-    time: "08:00 PM",
-    endTime: "10:00 PM",
-    guests: 5,
-    message: "حفل عيد ميلاد",
-    tableClass: "B",
-    status: "pending"
-  }
-];
-
-// === محاكاة الـ API ===
-
-// محاكاة fetchAvailableTables
-const fetchAvailableTables = async (search: AvailableTableSearch): Promise<Table[]> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return MOCK_TABLES.filter(table => {
-    if (table.capacity < search.guests) return false;
-    if (search.tableClass && table.class !== search.tableClass) return false;
-    if (!table.isAvailable) return false;
-    
-    const isReserved = MOCK_RESERVATIONS.some(reservation => 
-      reservation.tableId === table.id &&
-      reservation.date === search.date &&
-      reservation.status !== "cancelled" &&
-      ((reservation.time <= search.startTime && reservation.endTime > search.startTime) ||
-       (reservation.time < search.endTime && reservation.endTime >= search.endTime))
-    );
-    
-    return !isReserved;
+    // لو في API للحجوزات ممكن نعمل fetch عليها ونشيك التواقيت
+    return true;
   });
 };
 
-// محاكاة fetchUserReservations
-const fetchUserReservations = async (userId: string): Promise<Reservation[]> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return MOCK_RESERVATIONS.filter(reservation => reservation.status !== "cancelled");
-};
+// تأكيد حجز (لو الباك فيه endpoint للحجز)
+// eslint-disable-next-line react-refresh/only-export-components
+export const confirmReservation = async (tableId: string, reservationData: ReservationInput): Promise<void> => {
+  const res = await fetch(`${env.apiUrl}/reservations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tableId, ...reservationData })
+  });
 
-// محاكاة confirmReservation
-const confirmReservation = async (tableId: string, reservationData: ReservationInput): Promise<void> => {
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  const newReservation: Reservation = {
-    id: Date.now().toString(),
-    tableId,
-    ...reservationData,
-    status: "pending"
-  };
-  
-  MOCK_RESERVATIONS.push(newReservation);
-  
-  const table = MOCK_TABLES.find(t => t.id === tableId);
-  if (table) {
-    table.isAvailable = false;
-  }
-};
-
-// محاكاة updateReservation
-const updateReservation = async (reservationId: string, reservationData: ReservationInput): Promise<void> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  const reservationIndex = MOCK_RESERVATIONS.findIndex(r => r.id === reservationId);
-  if (reservationIndex !== -1) {
-    MOCK_RESERVATIONS[reservationIndex] = {
-      ...MOCK_RESERVATIONS[reservationIndex],
-      ...reservationData
-    };
-  }
-};
-
-// محاكاة cancelReservation
-const cancelReservation = async (reservationId: string): Promise<void> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  const reservationIndex = MOCK_RESERVATIONS.findIndex(r => r.id === reservationId);
-  if (reservationIndex !== -1) {
-    // تحديث حالة الحجز إلى cancelled
-    MOCK_RESERVATIONS[reservationIndex].status = "cancelled";
-    
-    // إعادة الطاولة إلى الحالة المتاحة
-    const tableId = MOCK_RESERVATIONS[reservationIndex].tableId;
-    const table = MOCK_TABLES.find(t => t.id === tableId);
-    if (table) {
-      table.isAvailable = true;
-    }
-  }
+  if (!res.ok) throw new Error('Failed to confirm reservation');
 };
 
 // Helper component for the Table Card
@@ -188,98 +85,107 @@ const TableCard = ({
   onReserve,
   isReserved,
 }: {
-  table: Table;
-  onReserve: (table: Table) => void;
+  table: TableItem;
+  onReserve: (table: TableItem) => void;
   isReserved: boolean;
 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-    className={clsx(
-      "glass-sheen rounded-xl p-6 space-y-3 cursor-pointer transition-all duration-300",
-      isReserved
-        ? "border-2 border-emerald-500 bg-emerald-900/30"
-        : table.isAvailable
-        ? "hover:border-accent/60 border border-white/10"
-        : "opacity-50 cursor-not-allowed border border-white/10"
-    )}
-    onClick={() => table.isAvailable && !isReserved && onReserve(table)}
-  >
-    <div className="flex items-center justify-between">
-      <h3 className="text-xl font-semibold text-white flex items-center">
-        <TableIcon className="w-6 h-6 mr-2 text-accent" />
-        {table.name}
-      </h3>
-      <span
-        className={clsx(
-          "px-3 py-1 text-xs font-medium rounded-full",
-          table.class === "A" && "bg-red-500/20 text-red-400",
-          table.class === "B" && "bg-yellow-500/20 text-yellow-400",
-          table.class === "C" && "bg-blue-500/20 text-blue-400",
-          table.class === "D" && "bg-purple-500/20 text-purple-400"
-        )}
-      >
-        كلاس {table.class}
-      </span>
-    </div>
-    <p className="text-sm text-white/70">
-      سعة: {table.capacity} أفراد
-    </p>
-    <p className={clsx("text-sm font-medium", table.isAvailable ? "text-emerald-400" : "text-red-400")}>
-      {isReserved ? "تم اختيارها" : table.isAvailable ? "متاحة للحجز" : "غير متاحة"}
-    </p>
-  </motion.div>
+ <motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.3 }}
+  className={clsx(
+    "glass-sheen rounded-xl p-6 space-y-3 cursor-pointer transition-all duration-300",
+    isReserved
+      ? "border-2 border-emerald-500 bg-emerald-900/30"
+      : !table.reserved
+      ? "hover:border-accent/60 border border-white/10"
+      : "opacity-50 cursor-not-allowed border border-white/10"
+  )}
+  onClick={() => !table.reserved && !isReserved && onReserve(table)}
+>
+  <div className="flex items-center justify-between">
+    <h3 className="text-xl font-semibold text-white flex items-center">
+      <TableIcon className="w-6 h-6 mr-2 text-accent" />
+      {table.name}
+    </h3>
+    <span
+      className={clsx(
+        "px-3 py-1 text-xs font-medium rounded-full",
+        table.category === "a" && "bg-red-500/20 text-red-400",
+        table.category === "b" && "bg-yellow-500/20 text-yellow-400",
+        table.category === "c" && "bg-blue-500/20 text-blue-400",
+        table.category === "d" && "bg-purple-500/20 text-purple-400"
+      )}
+    >
+      كلاس {table.category}
+    </span>
+  </div>
+  <p className="text-sm text-white/70">
+    سعة: {table.maxSeats} أفراد
+  </p>
+  <p className={clsx("text-sm font-medium", !table.reserved ? "text-emerald-400" : "text-red-400")}>
+    { !table.reserved ? "متاحة للحجز" : "غير متاحة"}
+  </p>
+</motion.div>
+
 );
 
 // Helper component for the User Reservation Card
+
+
+interface UserReservationCardProps {
+  reservation: Reservation;
+  onEdit: (reservation: Reservation) => void;
+  onCancel: (reservationId: string) => void;
+  cancelLoading?: boolean;
+}
+
 const UserReservationCard = ({
   reservation,
   onEdit,
   onCancel,
   cancelLoading,
-}: {
-  reservation: Reservation;
-  onEdit: (reservation: Reservation) => void;
-  onCancel: (reservationId: string) => void;
-  cancelLoading?: boolean;
-}) => (
+}: UserReservationCardProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3 }}
     className="glass-sheen rounded-xl p-6 space-y-3 border border-white/10"
   >
+    {/* Header */}
     <div className="flex items-center justify-between">
       <h3 className="text-xl font-semibold text-white flex items-center">
         <TableIcon className="w-6 h-6 mr-2 text-accent" />
-        حجز الطاولة {reservation.tableId}
+        حجز الطاولة {reservation.table.name}
       </h3>
       <span
         className={clsx(
           "px-3 py-1 text-xs font-medium rounded-full",
-          reservation.status === "confirmed" && "bg-emerald-500/20 text-emerald-400",
+          reservation.status === "accepted" && "bg-emerald-500/20 text-emerald-400",
           reservation.status === "pending" && "bg-yellow-500/20 text-yellow-400",
-          reservation.status === "cancelled" && "bg-red-500/20 text-red-400"
+          reservation.status === "refused" && "bg-red-500/20 text-red-400"
         )}
       >
-        {reservation.status === "confirmed" && "مؤكد"}
+        {reservation.status === "accepted" && "مؤكد"}
         {reservation.status === "pending" && "قيد الانتظار"}
-        {reservation.status === "cancelled" && "ملغي"}
+        {reservation.status === "refused" && "ملغي"}
       </span>
     </div>
+
+    {/* Details */}
     <div className="text-sm text-white/70 space-y-1">
       <p className="flex items-center">
         <CalendarIcon className="w-4 h-4 ml-2" />
-        التاريخ: {reservation.date}
+        التاريخ: {new Date(reservation.timeStart).toLocaleDateString("ar-EG")}
       </p>
       <p className="flex items-center">
         <ClockIcon className="w-4 h-4 ml-2" />
-        الوقت: {reservation.time} - {reservation.endTime}
+        الوقت: {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
+        {new Date(reservation.timeEnd).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
       </p>
       <p className="flex items-center">
         <UsersIcon className="w-4 h-4 ml-2" />
-        عدد الأفراد: {reservation.guests}
+        عدد الأفراد: {reservation.peopleCount}
       </p>
       {reservation.message && (
         <p className="text-white/60 mt-2">
@@ -287,7 +193,8 @@ const UserReservationCard = ({
         </p>
       )}
     </div>
-    
+
+    {/* Actions */}
     <div className="flex space-x-2 rtl:space-x-reverse pt-2">
       <Button
         className="flex-1"
@@ -296,11 +203,11 @@ const UserReservationCard = ({
         <PencilIcon className="w-4 h-4 ml-2" />
         تعديل
       </Button>
-      
-      {reservation.status !== "cancelled" && (
+
+      {reservation.status !== "refused" && (
         <Button
           variant="outline"
-          onClick={() => onCancel(reservation.id)}
+          onClick={() => onCancel(reservation._id)}
           loading={cancelLoading}
           className="text-red-400 border-red-400 hover:bg-red-400/10"
         >
@@ -311,6 +218,8 @@ const UserReservationCard = ({
     </div>
   </motion.div>
 );
+
+export default UserReservationCard;
 
 // Confirmation Modal for Cancellation
 const CancelConfirmationModal = ({
@@ -340,13 +249,20 @@ const CancelConfirmationModal = ({
         </h3>
         
         <p className="text-white/70">
-          هل أنت متأكد من أنك تريد إلغاء حجز الطاولة {reservation.tableId}؟
+          هل أنت متأكد من أنك تريد إلغاء حجز الطاولة {reservation.table.name}؟
         </p>
         
         <div className="text-sm text-white/60 bg-white/5 rounded-xl p-4">
-          <p>التاريخ: {reservation.date}</p>
-          <p>الوقت: {reservation.time} - {reservation.endTime}</p>
-          <p>عدد الأفراد: {reservation.guests}</p>
+          <p>
+            التاريخ: {new Date(reservation.timeStart).toLocaleDateString("ar-EG")}
+          </p>
+          <p>
+            الوقت: {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
+            {new Date(reservation.timeEnd).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+          </p>
+          <p>
+            عدد الأفراد: {reservation.peopleCount}
+          </p>
         </div>
         
         <div className="flex space-x-3 rtl:space-x-reverse pt-4">
@@ -372,6 +288,7 @@ const CancelConfirmationModal = ({
   </div>
 );
 
+
 const initialSearch: AvailableTableSearch = {
   date: new Date().toISOString().split("T")[0],
   startTime: "07:00 PM",
@@ -395,14 +312,14 @@ const initialReservationForm: ReservationInput = {
 export const ReservationsPage = () => {
   const [activeTab, setActiveTab] = useState<"new" | "my">("new");
   const [searchForm, setSearchForm] = useState<AvailableTableSearch>(initialSearch);
-  const [availableTables, setAvailableTables] = useState<Table[]>([]);
+  const [availableTables, setAvailableTables] = useState<TableItem[]>([]);
   const [userReservations, setUserReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
-  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+  const [selectedTable, setSelectedTable] = useState<TableItem | null>(null);
   const [reservationForm, setReservationForm] = useState<ReservationInput>(initialReservationForm);
   const [isConfirming, setIsConfirming] = useState(false);
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
@@ -425,7 +342,7 @@ export const ReservationsPage = () => {
     []
   );
 
-  const tableClasses: TableClass[] = ["A", "B", "C", "D"];
+  const tableClasses: TableClass[] = ["a", "b", "c", "d"];
 
   const minDate = useMemo(() => {
     const today = new Date();
@@ -492,7 +409,7 @@ export const ReservationsPage = () => {
     }
   }, [activeTab, fetchTables, fetchReservations]);
 
-  const handleTableSelect = (table: Table) => {
+  const handleTableSelect = (table: TableItem) => {
     setSelectedTable(table);
     setReservationForm((prev) => ({
       ...prev,
@@ -512,7 +429,7 @@ export const ReservationsPage = () => {
     setLoading(true);
     setFeedback(null);
     try {
-      await confirmReservation(selectedTable.id, reservationForm);
+      await confirmReservation(selectedTable._id, reservationForm);
       setFeedback({
         type: "success",
         message: "تم تأكيد الحجز بنجاح! ننتظرك.",
@@ -602,94 +519,104 @@ export const ReservationsPage = () => {
     setCancellingReservation(null);
   };
 
-  const renderSearchForm = () => (
-    <div className="space-y-4">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <label className=" text-sm text-white/70">
-          التاريخ
-          <input
-            type="date"
-            min={minDate}
-            required
-            value={searchForm.date}
-            onChange={(event) => handleSearchChange("date", event.target.value)}
-            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-          />
-        </label>
-        <label className=" text-sm text-white/70">
-          عدد الأفراد
-          <input
-            type="number"
-            min={1}
-            max={12}
-            required
-            value={searchForm.guests}
-            onChange={(event) =>
-              handleSearchChange("guests", Number(event.target.value))
-            }
-            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-          />
-        </label>
-        <label className=" text-sm text-white/70">
-          من وقت
-          <select
-            required
-            value={searchForm.startTime}
-            onChange={(event) =>
-              handleSearchChange("startTime", event.target.value)
-            }
-            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
-          >
-            {timeSlots.map((slot) => (
-              <option key={slot} value={slot} className="bg-night">
-                {slot}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="space-y-2 text-sm text-white/70">
-          إلى وقت
-          <select
-            required
-            value={searchForm.endTime}
-            onChange={(event) =>
-              handleSearchChange("endTime", event.target.value)
-            }
-            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
-          >
-            {timeSlots.map((slot) => (
-              <option key={slot} value={slot} className="bg-night">
-                {slot}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <label className=" text-sm  text-white/70 ">
-        نوع الطاولة (اختياري)
-        <select
-          value={searchForm.tableClass || ""}
+const renderSearchForm = () => (
+  <div className="space-y-4">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <label className="text-sm text-white/70">
+        التاريخ
+        <input
+          type="date"
+          min={minDate}
+          required
+          value={searchForm.date}
+          onChange={(event) => handleSearchChange("date", event.target.value)}
+          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+        />
+      </label>
+
+      <label className="text-sm text-white/70">
+        عدد الأفراد
+        <input
+          type="number"
+          min={1}
+          max={12}
+          required
+          value={searchForm.guests}
           onChange={(event) =>
-            handleSearchChange(
-              "tableClass",
-              event.target.value as TableClass | undefined
-            )
+            handleSearchChange("guests", Number(event.target.value))
           }
-          className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0 my-2"
+          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+        />
+      </label>
+
+      <label className="text-sm text-white/70">
+        من وقت
+        <select
+          required
+          value={searchForm.startTime}
+          onChange={(event) =>
+            handleSearchChange("startTime", event.target.value)
+          }
+          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
         >
-          <option value="">كل الأنواع</option>
-          {tableClasses.map((cls) => (
-            <option key={cls} value={cls} className="bg-night">
-              كلاس {cls}
+          {timeSlots.map((slot) => (
+            <option key={slot} value={slot} className="bg-night">
+              {slot}
             </option>
           ))}
         </select>
       </label>
-      <Button onClick={fetchTables} loading={loading} className="w-full">
-        بحث عن طاولات متاحة
-      </Button>
+
+      <label className="space-y-2 text-sm text-white/70">
+        إلى وقت
+        <select
+          required
+          value={searchForm.endTime}
+          onChange={(event) =>
+            handleSearchChange("endTime", event.target.value)
+          }
+          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
+        >
+          {timeSlots.map((slot) => (
+            <option key={slot} value={slot} className="bg-night">
+              {slot}
+            </option>
+          ))}
+        </select>
+      </label>
     </div>
-  );
+
+    <label className="text-sm text-white/70">
+      نوع الطاولة (اختياري)
+      <select
+        value={searchForm.tableClass || ""}
+        onChange={(event) =>
+          handleSearchChange(
+            "tableClass",
+            event.target.value as TableClass | undefined
+          )
+        }
+        className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0 my-2"
+      >
+        <option value="">كل الأنواع</option>
+        {tableClasses.map((cls) => (
+          <option key={cls} value={cls} className="bg-night">
+            كلاس {cls}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    <Button
+      onClick={() => fetchAvailableTables(searchForm)} // هنا بتمرير searchForm للباك
+      loading={loading}
+      className="w-full"
+    >
+      بحث عن طاولات متاحة
+    </Button>
+  </div>
+);
+
 
   const renderAvailableTables = () => {
     if (loading) {
@@ -710,10 +637,10 @@ export const ReservationsPage = () => {
         <div className="grid gap-6 md:grid-cols-2">
           {availableTables.map((table) => (
             <TableCard
-              key={table.id}
+              key={table._id}
               table={table}
               onReserve={handleTableSelect}
-              isReserved={selectedTable?.id === table.id}
+              isReserved={selectedTable?._id === table._id}
             />
           ))}
         </div>
@@ -778,7 +705,7 @@ export const ReservationsPage = () => {
             <input
               type="number"
               min={1}
-              max={selectedTable?.capacity || 12}
+              max={selectedTable?.maxSeats || 12}
               required
               value={reservationForm.guests}
               onChange={(event) =>

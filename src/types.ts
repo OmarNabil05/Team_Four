@@ -10,7 +10,7 @@ export type ReservationInput = {
   message: string;
   // New fields based on user request
   endTime?: string; // For time range
-  tableClass?: 'A' | 'B' | 'C' | 'D'; // For table type/class
+  tableClass?: 'a' | 'b' | 'c' | 'd'; // For table type/class
 };
 
 export type Reservation = {
@@ -22,22 +22,32 @@ export type Reservation = {
   updatedAt: string;
 } & ReservationInput;
 
-export type TableClass = 'A' | 'B' | 'C' | 'D';
+export type TableClass = 'a' | 'b' | 'c' | 'd';
 
-export interface Table {
-  id: string;
+export type TableItem = {
+  _id: string;
   name: string;
-  class: TableClass;
-  capacity: number;
-  isAvailable: boolean;
-}
+  category: string;
+  maxSeats: number;
+  reserved: boolean;
+  isAvailable?: boolean; 
+};
 
-export interface AvailableTableSearch {
+export type AvailableTableSearch = {
   date: string;
-  guests: number;
   startTime: string;
   endTime: string;
+  guests: number;
   tableClass?: TableClass;
+};
+export type MenuCategory = "Appetizers" | "Main Courses" | "Desserts" | "Drinks";
+
+export interface MenuItem {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: MenuCategory;
+  isAvailable: boolean;
 }
-
-

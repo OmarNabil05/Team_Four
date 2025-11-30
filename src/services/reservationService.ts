@@ -1,44 +1,79 @@
-import { api } from '../lib/api';
-import type { Reservation, ReservationInput, ReservationStatus, Table, AvailableTableSearch } from '../types';
+import env from '../config/env';
+import type { TableItem, Reservation, ReservationInput } from '../types';
 
-export const createReservation = async (payload: ReservationInput) => {
-  const { data } = await api.post<{ data: Reservation }>('/reservations', payload);
-  return data.data;
+
+
+
+// جلب كل الطاولات
+export const fetchTables = async (): Promise<TableItem[]> => {
+  const res = await fetch(`${env.apiUrl}/tables`);
+  if (!res.ok) throw new Error('Failed to fetch tables');
+  const data = await res.json();
+
+  return data.map((item: any) => ({
+    _id: item._id,
+    name: item.name,
+    category: item.category,
+    maxSeats: item.maxSeats,
+    reserved: item.reserved,
+    isAvailable: !item.reserved,
+  }));
 };
 
-export const fetchReservations = async () => {
-  const { data } = await api.get<{ data: Reservation[] }>('/reservations');
-  return data.data;
+// جلب حجوزات المستخدم
+export const fetchUserReservations = async (userId: string): Promise<Reservation[]> => {
+  const res = await fetch(`${env.apiUrl}/reservations?userId=${userId}`);
+  if (!res.ok) throw new Error('Failed to fetch reservations');
+  const data = await res.json();
+  return data;
 };
 
-export const updateReservationStatus = async (id: string, status: ReservationStatus) => {
-  const { data } = await api.patch<{ data: Reservation }>(`/reservations/${id}/status`, { status });
-  return data.data;
+
+// تأكيد حجز
+export const confirmReservation = async (
+  tableId: string,
+  reservationData: ReservationInput
+): Promise<void> => {
+  const timeStartIso = new Date(
+    `${reservationData.date}T${reservationData.time}:00`
+  ).toISOString();
+
+  const bodyToSend = {
+    tableId,
+    customerName: reservationData.name, // مهم جداً
+    timeStart: timeStartIso,
+    durationMinutes: 120, // ثابت أو من reservationData لو عندك
+    peopleCount: reservationData.guests, // مهم جداً
+  };
+
+  const res = await fetch(`${env.apiUrl}/reservations`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(bodyToSend),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Failed to confirm reservation: ${errText}`);
+  }
 };
 
-export const deleteReservation = async (id: string) => {
-  await api.delete(`/reservations/${id}`);
-};
 
-export const fetchAvailableTables = async (search: AvailableTableSearch) => {
-  const { data } = await api.get<{ data: Table[] }>('/tables/available', { params: search });
-  return data.data;
-};
 
-export const confirmReservation = async (tableId: string, payload: ReservationInput) => {
-  const { data } = await api.post<{ data: Reservation }>(`/tables/${tableId}/reserve`, payload);
-  return data.data;
-};
 
-export const fetchUserReservations = async (userId: string) => {
-  // NOTE: This is a placeholder. In a real app, the userId would likely be fetched from the auth context.
-  // For now, we'll assume the API can infer the user from the session/token, or we'll pass a dummy ID.
-  const id = userId || 'current_user_id'; 
-  const { data } = await api.get<{ data: Reservation[] }>(`/users/${id}/reservations`);
-  return data.data;
-};
+export const updateReservation = async (reservationId: string, reservationData: ReservationInput): Promise<void> => {
+  const res = await fetch(`${env.apiUrl}/reservations/${reservationId}`, {
+    method: 'PUT', // أو PATCH حسب الباك
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reservationData),
+  });
 
-export const updateReservation = async (id: string, payload: Partial<ReservationInput>) => {
-  const { data } = await api.patch<{ data: Reservation }>(`/reservations/${id}`, payload);
-  return data.data;
+  if (!res.ok) throw new Error('Failed to update reservation');
+};
+export const cancelReservation = async (reservationId: string): Promise<void> => {
+  const res = await fetch(`${env.apiUrl}/reservations/${reservationId}`, {
+    method: 'DELETE', // أو حسب endpoint الباك
+  });
+
+  if (!res.ok) throw new Error('Failed to cancel reservation');
 };

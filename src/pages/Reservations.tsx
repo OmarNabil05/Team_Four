@@ -422,94 +422,151 @@ export const ReservationsPage = () => {
     setIsConfirming(true);
   };
 
-  const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!selectedTable) return;
+const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  if (!selectedTable) return;
 
-    setLoading(true);
-    setFeedback(null);
-    try {
-      await confirmReservation(selectedTable._id, reservationForm);
-      setFeedback({
-        type: "success",
-        message: "تم تأكيد الحجز بنجاح! ننتظرك.",
-      });
-      setIsConfirming(false);
-      setSelectedTable(null);
-      setReservationForm(initialReservationForm);
-      fetchTables();
-      fetchReservations();
-    } catch (error) {
+  setLoading(true);
+  setFeedback(null);
+
+  try {
+    if (!reservationForm.time) {
       setFeedback({
         type: "error",
-        message: "حدث خطأ أثناء تأكيد الحجز.",
+        message: "الرجاء تحديد وقت البداية للحجز.",
       });
-    } finally {
       setLoading(false);
+      return;
     }
-  };
 
-  const handleEditReservation = (reservation: Reservation) => {
-    setEditingReservation(reservation);
-    setReservationForm({
-      name: reservation.name,
-      email: reservation.email,
-      phone: reservation.phone,
-      date: reservation.date,
-      time: reservation.time,
-      endTime: reservation.endTime,
-      guests: reservation.guests,
-      message: reservation.message || "",
-      tableClass: reservation.tableClass,
+    // حضر payload للباك حسب الشكل المطلوب
+    const payload = {
+      customerName: reservationForm.name,
+      email: reservationForm.email,
+      phone: reservationForm.phone,
+      tableId: selectedTable._id,  // _id للطاولة
+      timeStart: new Date(`${reservationForm.date}T${reservationForm.timeStart}`).toISOString(),
+      peopleCount: Number(reservationForm.guests),
+      message: reservationForm.message || "",
+      status: "pending", // ثابت دايمًا
+    };
+
+    // استدعاء الدالة اللي بتعمل POST للباك
+    await confirmReservation(payload);
+
+    setFeedback({
+      type: "success",
+      message: "تم تأكيد الحجز بنجاح! ننتظرك.",
     });
-  };
 
-  const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!editingReservation) return;
+    setIsConfirming(false);
+    setSelectedTable(null);
+    setReservationForm(initialReservationForm);
 
-    setLoading(true);
-    setFeedback(null);
-    try {
-      await updateReservation(editingReservation.id, reservationForm);
-      setFeedback({
-        type: "success",
-        message: "تم تعديل الحجز بنجاح.",
-      });
-      setEditingReservation(null);
-      setReservationForm(initialReservationForm);
-      fetchReservations();
-    } catch (error) {
-      setFeedback({
-        type: "error",
-        message: "حدث خطأ أثناء تعديل الحجز.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchTables();
+    fetchReservations();
+  } catch (error) {
+    console.error("Reservation error:", error);
+    setFeedback({
+      type: "error",
+      message: "حدث خطأ أثناء تأكيد الحجز.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleCancelReservation = async (reservationId: string) => {
-    setCancelLoading(true);
-    setFeedback(null);
-    try {
-      await cancelReservation(reservationId);
-      setFeedback({
-        type: "success",
-        message: "تم إلغاء الحجز بنجاح.",
-      });
-      setCancellingReservation(null);
-      fetchReservations();
-      fetchTables(); // تحديث الطاولات المتاحة
-    } catch (error) {
-      setFeedback({
-        type: "error",
-        message: "حدث خطأ أثناء إلغاء الحجز.",
-      });
-    } finally {
-      setCancelLoading(false);
-    }
-  };
+
+
+
+const handleEditReservation = (reservation: Reservation) => {
+  setEditingReservation(reservation);
+  setReservationForm({
+    name: reservation.customerName, // محدثة حسب الباي لود الجديد
+    email: reservation.email || "",
+    phone: reservation.phone || "",
+    date: reservation.timeStart ? new Date(reservation.timeStart).toISOString().split("T")[0] : "",
+    time: reservation.timeStart ? new Date(reservation.timeStart).toISOString().split("T")[1].slice(0,5) : "",
+    guests: reservation.peopleCount,
+    message: reservation.message || "",
+  });
+};
+
+
+const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  if (!editingReservation) return;
+
+  setLoading(true);
+  setFeedback(null);
+
+  try {
+    // حضر payload بالشكل المطلوب
+    const payload = {
+      customerName: reservationForm.name,
+      email: reservationForm.email || "",
+      phone: reservationForm.phone || "",
+      tableId: editingReservation.table._id, // _id للطاولة اللي متاخدة من الحجز القديم
+      timeStart: new Date(`${reservationForm.date}T${reservationForm.time}:00`).toISOString(),
+      peopleCount: Number(reservationForm.guests),
+      message: reservationForm.message || "",
+      status: "pending", // دايمًا pending بعد التعديل
+    };
+
+    // استدعاء الدالة لتحديث الحجز
+    await updateReservation(editingReservation._id, payload);
+
+    setFeedback({
+      type: "success",
+      message: "تم تعديل الحجز بنجاح.",
+    });
+
+    setEditingReservation(null);
+    setReservationForm(initialReservationForm);
+    fetchReservations();
+  } catch (error) {
+    console.error("Update reservation error:", error);
+    setFeedback({
+      type: "error",
+      message: "حدث خطأ أثناء تعديل الحجز.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const handleCancelReservation = async (reservationId: string) => {
+  setCancelLoading(true);
+  setFeedback(null);
+
+  try {
+    // استدعاء API لإلغاء الحجز
+    await cancelReservation(reservationId);
+
+    // إعطاء رسالة نجاح
+    setFeedback({
+      type: "success",
+      message: "تم إلغاء الحجز بنجاح.",
+    });
+
+    // إعادة ضبط الـ modal أو أي حالة خاصة بالإلغاء
+    setCancellingReservation(null);
+
+    // تحديث الحجوزات والطاولات بعد الإلغاء
+    await fetchReservations();
+    await fetchTables();
+  } catch (error) {
+    console.error("Cancel reservation error:", error); // سجل الخطأ
+    setFeedback({
+      type: "error",
+      message: "حدث خطأ أثناء إلغاء الحجز.",
+    });
+  } finally {
+    setCancelLoading(false);
+  }
+};
+
 
   const showCancelConfirmation = (reservation: Reservation) => {
     setCancellingReservation(reservation);
@@ -549,41 +606,7 @@ const renderSearchForm = () => (
         />
       </label>
 
-      <label className="text-sm text-white/70">
-        من وقت
-        <select
-          required
-          value={searchForm.startTime}
-          onChange={(event) =>
-            handleSearchChange("startTime", event.target.value)
-          }
-          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
-        >
-          {timeSlots.map((slot) => (
-            <option key={slot} value={slot} className="bg-night">
-              {slot}
-            </option>
-          ))}
-        </select>
-      </label>
 
-      <label className="space-y-2 text-sm text-white/70">
-        إلى وقت
-        <select
-          required
-          value={searchForm.endTime}
-          onChange={(event) =>
-            handleSearchChange("endTime", event.target.value)
-          }
-          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
-        >
-          {timeSlots.map((slot) => (
-            <option key={slot} value={slot} className="bg-night">
-              {slot}
-            </option>
-          ))}
-        </select>
-      </label>
     </div>
 
     <label className="text-sm text-white/70">
@@ -648,109 +671,152 @@ const renderSearchForm = () => (
     );
   };
 
-  const renderConfirmationForm = () => (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="glass-sheen rounded-3xl p-10 space-y-6"
-    >
-      <SectionHeading
-        align="left"
-        eyebrow="تأكيد الحجز"
-        title={`تأكيد حجز الطاولة ${selectedTable?.name}`}
-        description="يرجى إدخال بياناتك لتأكيد الحجز."
-      />
-      <form onSubmit={handleConfirmReservation} className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          <label className="space-y-2 text-sm text-white/70">
-            الاسم
-            <input
-              type="text"
-              required
-              value={reservationForm.name}
-              onChange={(event) =>
-                handleReservationFormChange("name", event.target.value)
-              }
-              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-            />
-          </label>
-          <label className="space-y-2 text-sm text-white/70">
-            الايميل
-            <input
-              type="email"
-              required
-              value={reservationForm.email}
-              onChange={(event) =>
-                handleReservationFormChange("email", event.target.value)
-              }
-              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-            />
-          </label>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          <label className="space-y-2 text-sm text-white/70">
-            رقم الهاتف
-            <input
-              type="tel"
-              required
-              value={reservationForm.phone}
-              onChange={(event) =>
-                handleReservationFormChange("phone", event.target.value)
-              }
-              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-            />
-          </label>
-          <label className="space-y-2 text-sm text-white/70">
-            عدد الأفراد
-            <input
-              type="number"
-              min={1}
-              max={selectedTable?.maxSeats || 12}
-              required
-              value={reservationForm.guests}
-              onChange={(event) =>
-                handleReservationFormChange("guests", Number(event.target.value))
-              }
-              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-            />
-          </label>
-        </div>
+const renderConfirmationForm = () => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    className="glass-sheen rounded-3xl p-10 space-y-6"
+  >
+    <SectionHeading
+      align="left"
+      eyebrow="تأكيد الحجز"
+      title={`تأكيد حجز الطاولة ${selectedTable?.name}`}
+      description="يرجى إدخال بياناتك لتأكيد الحجز."
+    />
+
+    <form onSubmit={handleConfirmReservation} className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* الاسم */}
         <label className="space-y-2 text-sm text-white/70">
-          ملاحظات (اختياري)
-          <textarea
-            rows={3}
-            value={reservationForm.message}
-            onChange={(event) =>
-              handleReservationFormChange("message", event.target.value)
-            }
-            className="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-            placeholder="احكي لنا عن أي احتياجات أكل، مناسبات، أو أي طلبات خاصة عندك."
+          الاسم
+          <input
+            type="text"
+            required
+            value={reservationForm.name}
+            onChange={(e) => handleReservationFormChange("name", e.target.value)}
+            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
           />
         </label>
-        {feedback && (
-          <p
-            className={clsx(
-              "text-sm",
-              feedback.type === "success" ? "text-emerald-400" : "text-red-400"
-            )}
+
+        {/* الايميل */}
+        <label className="space-y-2 text-sm text-white/70">
+          الايميل
+          <input
+            type="email"
+            required
+            value={reservationForm.email}
+            onChange={(e) => handleReservationFormChange("email", e.target.value)}
+            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+          />
+        </label>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* رقم الهاتف */}
+        <label className="space-y-2 text-sm text-white/70">
+          رقم الهاتف
+          <input
+            type="tel"
+            required
+            value={reservationForm.phone}
+            onChange={(e) => handleReservationFormChange("phone", e.target.value)}
+            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+          />
+        </label>
+
+        {/* عدد الأفراد */}
+        <label className="space-y-2 text-sm text-white/70">
+          عدد الأفراد
+          <input
+            type="number"
+            min={1}
+            max={selectedTable?.maxSeats || 12}
+            required
+            value={reservationForm.guests}
+            onChange={(e) =>
+              handleReservationFormChange("guests", Number(e.target.value))
+            }
+            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+          />
+        </label>
+      </div>
+
+      {/* اختيار الوقت */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <label className="text-sm text-white/70">
+          من وقت
+          <select
+            required
+            value={reservationForm.timeStart}
+            onChange={(e) =>
+              handleReservationFormChange("timeStart", e.target.value)
+            }
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
           >
-            {feedback.message}
-          </p>
-        )}
-        <div className="flex space-x-4 rtl:space-x-reverse">
-          <Button type="submit" loading={loading} className="flex-1">
-            تأكيد الحجز
-          </Button>
-          <Button
-            type="button"
-            onClick={() => setIsConfirming(false)}
+            {timeSlots.map((slot) => (
+              <option key={slot} value={slot} className="bg-night">
+                {slot}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="text-sm text-white/70">
+          إلى وقت
+          <select
+            required
+            value={reservationForm.timeEnd}
+            onChange={(e) =>
+              handleReservationFormChange("timeEnd", e.target.value)
+            }
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
           >
-            إلغاء
-          </Button>
-        </div>
-      </form>
-    </motion.div>
-  );
+            {timeSlots.map((slot) => (
+              <option key={slot} value={slot} className="bg-night">
+                {slot}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      {/* ملاحظات */}
+      <label className="space-y-2 text-sm text-white/70">
+        ملاحظات (اختياري)
+        <textarea
+          rows={3}
+          value={reservationForm.message}
+          onChange={(e) => handleReservationFormChange("message", e.target.value)}
+          className="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+          placeholder="احكي لنا عن أي احتياجات أكل، مناسبات، أو أي طلبات خاصة عندك."
+        />
+      </label>
+
+      {/* رسالة الفيدباك */}
+      {feedback && (
+        <p
+          className={clsx(
+            "text-sm",
+            feedback.type === "success" ? "text-emerald-400" : "text-red-400"
+          )}
+        >
+          {feedback.message}
+        </p>
+      )}
+
+      {/* أزرار */}
+      <div className="flex space-x-4 rtl:space-x-reverse">
+        <Button type="submit" loading={loading} className="flex-1">
+          تأكيد الحجز
+        </Button>
+        <Button type="button" onClick={() => setIsConfirming(false)}>
+          إلغاء
+        </Button>
+      </div>
+    </form>
+  </motion.div>
+);
+
 
   const renderMyReservations = () => {
     if (loading) {

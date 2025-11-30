@@ -1,17 +1,16 @@
 export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
 export type ReservationInput = {
-  name: string;
-  email: string;
-  phone: string;
-  date: string;
-  time: string;
-  guests: number;
-  message: string;
-  // New fields based on user request
-  endTime?: string; // For time range
-  tableClass?: 'a' | 'b' | 'c' | 'd'; // For table type/class
+  customerName: string;      // الاسم
+  email: string;             // الايميل
+  phone: string;             // رقم الهاتف
+  tableId: string;           // Id الطاولة
+  timeStart: string;         // وقت البداية بصيغة ISO
+  peopleCount: number;       // عدد الأفراد
+  message?: string;          // ملاحظات اختيارية
+  status: ReservationStatus;         // الحالة ثابتة على "pending"
 };
+
 
 export type Reservation = {
   id: string;

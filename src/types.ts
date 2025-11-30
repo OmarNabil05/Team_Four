@@ -24,18 +24,20 @@ export type Reservation = {
 
 export type TableClass = 'A' | 'B' | 'C' | 'D';
 
-export type Table = {
+export interface Table {
   id: string;
   name: string;
-  capacity: number;
   class: TableClass;
+  capacity: number;
   isAvailable: boolean;
-};
+}
 
-export type AvailableTableSearch = {
+export interface AvailableTableSearch {
   date: string;
+  guests: number;
   startTime: string;
   endTime: string;
-  guests: number;
   tableClass?: TableClass;
-};
+}
+
+

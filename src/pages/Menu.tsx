@@ -131,7 +131,7 @@ export const MenuPage = () => {
                               {item.title}
                             </h4>
                             <span className="font-semibold text-accent">
-                              ${item.price.toFixed(2)}
+                             {item.price.toFixed(2)} ج.م
                             </span>
                           </div>
                           <p className="text-sm text-white/60">

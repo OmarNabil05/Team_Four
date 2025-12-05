@@ -16,12 +16,21 @@ return data.map((item: any) => ({
   description: item.description,
   price: item.price,
   imageUrl: item.photoUrl,
+
   category:
-    item.category === "Dessert" ? "Desserts" :
-    item.category === "Beverage" ? "Drinks" :
-    item.category.toLowerCase() === "drinks" ? "Drinks" :
-    item.category,  // أي حاجة تانية
+    item.category.toLowerCase() === "main"
+      ? "Main Courses"
+      : item.category.toLowerCase() === "appetizer"
+      ? "Appetizers"
+      : item.category.toLowerCase() === "desserts"
+      ? "Desserts"
+      : item.category.toLowerCase() === "beverage" ||
+        item.category.toLowerCase() === "drinks"
+      ? "Drinks"
+      : item.category, // fallback لأي حاجة تانية
+
   isAvailable: true,
 }));
+
 
 };

@@ -6,13 +6,14 @@ import { SectionHeading } from "../components/common/SectionHeading";
 import { Button } from "../components/ui/Button";
 import type {
   ReservationInput,
+  ReservationFormData,
   TableItem,
   AvailableTableSearch,
   Reservation,
   TableClass,
 } from "../types";
 import clsx from "clsx";
-import { fetchTables,fetchUserReservations,updateReservation,cancelReservation } from "../services/reservationService";
+import { fetchTables,fetchUserReservations,updateReservation,cancelReservation,confirmReservation as confirmReservationService } from "../services/reservationService";
 import env from "../config/env";
 
 
@@ -67,17 +68,6 @@ export const fetchAvailableTables = async (search: AvailableTableSearch): Promis
   });
 };
 
-// تأكيد حجز (لو الباك فيه endpoint للحجز)
-// eslint-disable-next-line react-refresh/only-export-components
-export const confirmReservation = async (tableId: string, reservationData: ReservationInput): Promise<void> => {
-  const res = await fetch(`${env.apiUrl}/reservations`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tableId, ...reservationData })
-  });
-
-  if (!res.ok) throw new Error('Failed to confirm reservation');
-};
 
 // Helper component for the Table Card
 const TableCard = ({
@@ -297,13 +287,15 @@ const initialSearch: AvailableTableSearch = {
   tableClass: undefined,
 };
 
-const initialReservationForm: ReservationInput = {
+const initialReservationForm: ReservationFormData = {
   name: "",
   email: "",
   phone: "",
   date: initialSearch.date,
   time: initialSearch.startTime,
+  timeStart: initialSearch.startTime,
   endTime: initialSearch.endTime,
+  timeEnd: initialSearch.endTime,
   guests: initialSearch.guests,
   message: "",
   tableClass: initialSearch.tableClass,
@@ -320,7 +312,7 @@ export const ReservationsPage = () => {
     message: string;
   } | null>(null);
   const [selectedTable, setSelectedTable] = useState<TableItem | null>(null);
-  const [reservationForm, setReservationForm] = useState<ReservationInput>(initialReservationForm);
+  const [reservationForm, setReservationForm] = useState<ReservationFormData>(initialReservationForm);
   const [isConfirming, setIsConfirming] = useState(false);
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [cancellingReservation, setCancellingReservation] = useState<Reservation | null>(null);
@@ -357,7 +349,7 @@ export const ReservationsPage = () => {
   };
 
   const handleReservationFormChange = (
-    field: keyof ReservationInput,
+    field: keyof ReservationFormData,
     value: string | number | TableClass | undefined
   ) => {
     setReservationForm((prev) => ({ ...prev, [field]: value }));
@@ -415,7 +407,9 @@ export const ReservationsPage = () => {
       ...prev,
       date: searchForm.date,
       time: searchForm.startTime,
+      timeStart: searchForm.startTime,
       endTime: searchForm.endTime,
+      timeEnd: searchForm.endTime,
       guests: searchForm.guests,
       tableClass: table.class,
     }));
@@ -430,7 +424,7 @@ const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
   setFeedback(null);
 
   try {
-    if (!reservationForm.time) {
+    if (!reservationForm.timeStart) {
       setFeedback({
         type: "error",
         message: "الرجاء تحديد وقت البداية للحجز.",
@@ -439,20 +433,53 @@ const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
       return;
     }
 
+    // Convert time strings to 24-hour format for ISO date
+    const convertTimeTo24Hour = (timeStr: string): string => {
+      const [time, period] = timeStr.split(' ');
+      const [hours, minutes] = time.split(':');
+      let hour24 = parseInt(hours);
+      if (period === 'PM' && hour24 !== 12) hour24 += 12;
+      if (period === 'AM' && hour24 === 12) hour24 = 0;
+      return `${hour24.toString().padStart(2, '0')}:${minutes}`;
+    };
+
+    // Calculate duration in minutes
+    const calculateDuration = (start: string, end: string): number => {
+      const start24 = convertTimeTo24Hour(start);
+      const end24 = convertTimeTo24Hour(end);
+      const [startHour, startMin] = start24.split(':').map(Number);
+      const [endHour, endMin] = end24.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+      return endMinutes - startMinutes;
+    };
+
+    const timeStart24 = convertTimeTo24Hour(reservationForm.timeStart);
+    const timeStartIso = new Date(`${reservationForm.date}T${timeStart24}:00`).toISOString();
+    const durationMinutes = reservationForm.timeEnd 
+      ? calculateDuration(reservationForm.timeStart, reservationForm.timeEnd)
+      : 120; // Default 2 hours
+
     // حضر payload للباك حسب الشكل المطلوب
     const payload = {
       customerName: reservationForm.name,
-      email: reservationForm.email,
-      phone: reservationForm.phone,
-      tableId: selectedTable._id,  // _id للطاولة
-      timeStart: new Date(`${reservationForm.date}T${reservationForm.timeStart}`).toISOString(),
+      tableId: selectedTable._id,
+      timeStart: timeStartIso,
+      durationMinutes: durationMinutes,
       peopleCount: Number(reservationForm.guests),
-      message: reservationForm.message || "",
-      status: "pending", // ثابت دايمًا
     };
 
     // استدعاء الدالة اللي بتعمل POST للباك
-    await confirmReservation(payload);
+    const res = await fetch(`${env.apiUrl}/reservations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Failed to confirm reservation: ${errorText}`);
+    }
 
     setFeedback({
       type: "success",
@@ -469,7 +496,7 @@ const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
     console.error("Reservation error:", error);
     setFeedback({
       type: "error",
-      message: "حدث خطأ أثناء تأكيد الحجز.",
+      message: error instanceof Error ? error.message : "حدث خطأ أثناء تأكيد الحجز.",
     });
   } finally {
     setLoading(false);
@@ -481,12 +508,27 @@ const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
 
 const handleEditReservation = (reservation: Reservation) => {
   setEditingReservation(reservation);
+  const timeStartDate = reservation.timeStart ? new Date(reservation.timeStart) : null;
+  const timeEndDate = reservation.timeEnd ? new Date(reservation.timeEnd) : null;
+  
+  // Convert 24-hour time to 12-hour format with AM/PM
+  const formatTime12Hour = (date: Date): string => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 || 12;
+    return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+  
   setReservationForm({
-    name: reservation.customerName, // محدثة حسب الباي لود الجديد
+    name: reservation.customerName,
     email: reservation.email || "",
     phone: reservation.phone || "",
-    date: reservation.timeStart ? new Date(reservation.timeStart).toISOString().split("T")[0] : "",
-    time: reservation.timeStart ? new Date(reservation.timeStart).toISOString().split("T")[1].slice(0,5) : "",
+    date: timeStartDate ? timeStartDate.toISOString().split("T")[0] : "",
+    time: timeStartDate ? formatTime12Hour(timeStartDate) : "",
+    timeStart: timeStartDate ? formatTime12Hour(timeStartDate) : "",
+    timeEnd: timeEndDate ? formatTime12Hour(timeEndDate) : "",
+    endTime: timeEndDate ? formatTime12Hour(timeEndDate) : "",
     guests: reservation.peopleCount,
     message: reservation.message || "",
   });
@@ -501,16 +543,51 @@ const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
   setFeedback(null);
 
   try {
+    // Convert time strings to 24-hour format for ISO date
+    const convertTimeTo24Hour = (timeStr: string): string => {
+      const [time, period] = timeStr.split(' ');
+      const [hours, minutes] = time.split(':');
+      let hour24 = parseInt(hours);
+      if (period === 'PM' && hour24 !== 12) hour24 += 12;
+      if (period === 'AM' && hour24 === 12) hour24 = 0;
+      return `${hour24.toString().padStart(2, '0')}:${minutes}`;
+    };
+
+    // Calculate duration in minutes
+    const calculateDuration = (start: string, end: string): number => {
+      const start24 = convertTimeTo24Hour(start);
+      const end24 = convertTimeTo24Hour(end);
+      const [startHour, startMin] = start24.split(':').map(Number);
+      const [endHour, endMin] = end24.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+      return endMinutes - startMinutes;
+    };
+
+    const timeStartValue = reservationForm.timeStart || reservationForm.time || "";
+    if (!timeStartValue) {
+      setFeedback({
+        type: "error",
+        message: "الرجاء تحديد وقت البداية للحجز.",
+      });
+      setLoading(false);
+      return;
+    }
+
+    const timeStart24 = convertTimeTo24Hour(timeStartValue);
+    const timeStartIso = new Date(`${reservationForm.date}T${timeStart24}:00`).toISOString();
+    const durationMinutes = reservationForm.timeEnd 
+      ? calculateDuration(timeStartValue, reservationForm.timeEnd)
+      : editingReservation.durationMinutes || 120;
+
     // حضر payload بالشكل المطلوب
     const payload = {
       customerName: reservationForm.name,
-      email: reservationForm.email || "",
-      phone: reservationForm.phone || "",
-      tableId: editingReservation.table._id, // _id للطاولة اللي متاخدة من الحجز القديم
-      timeStart: new Date(`${reservationForm.date}T${reservationForm.time}:00`).toISOString(),
+      tableId: editingReservation.table._id,
+      timeStart: timeStartIso,
+      durationMinutes: durationMinutes,
       peopleCount: Number(reservationForm.guests),
       message: reservationForm.message || "",
-      status: "pending", // دايمًا pending بعد التعديل
     };
 
     // استدعاء الدالة لتحديث الحجز
@@ -831,11 +908,11 @@ const renderConfirmationForm = () => (
       <div className="grid gap-6 md:grid-cols-2">
         {userReservations.map((reservation) => (
           <UserReservationCard
-            key={reservation.id}
+            key={reservation._id}
             reservation={reservation}
             onEdit={handleEditReservation}
             onCancel={showCancelConfirmation}
-            cancelLoading={cancelLoading && cancellingReservation?.id === reservation.id}
+            cancelLoading={cancelLoading && cancellingReservation?._id === reservation._id}
           />
         ))}
       </div>
@@ -1061,7 +1138,7 @@ const renderConfirmationForm = () => (
         {cancellingReservation && (
           <CancelConfirmationModal
             reservation={cancellingReservation}
-            onConfirm={() => handleCancelReservation(cancellingReservation.id)}
+            onConfirm={() => handleCancelReservation(cancellingReservation._id)}
             onCancel={hideCancelConfirmation}
             loading={cancelLoading}
           />

@@ -61,14 +61,17 @@ export const confirmReservation = async (
 
 
 
-export const updateReservation = async (reservationId: string, reservationData: ReservationInput): Promise<void> => {
+export const updateReservation = async (reservationId: string, reservationData: Partial<ReservationInput> & { durationMinutes?: number }): Promise<void> => {
   const res = await fetch(`${env.apiUrl}/reservations/${reservationId}`, {
     method: 'PUT', // أو PATCH حسب الباك
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(reservationData),
   });
 
-  if (!res.ok) throw new Error('Failed to update reservation');
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to update reservation: ${errorText}`);
+  }
 };
 export const cancelReservation = async (reservationId: string): Promise<void> => {
   const res = await fetch(`${env.apiUrl}/reservations/${reservationId}`, {

@@ -54,6 +54,12 @@ const TrashIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const CheckIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  </svg>
+);
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const fetchAvailableTables = async (search: AvailableTableSearch): Promise<TableItem[]> => {
   const tables = await fetchTables();
@@ -126,7 +132,7 @@ const TableCard = ({
 interface UserReservationCardProps {
   reservation: Reservation;
   onEdit: (reservation: Reservation) => void;
-  onCancel: (reservationId: string) => void;
+  onCancel: (reservation: Reservation) => void;
   cancelLoading?: boolean;
 }
 
@@ -197,7 +203,7 @@ const UserReservationCard = ({
       {reservation.status !== "refused" && (
         <Button
           variant="outline"
-          onClick={() => onCancel(reservation._id)}
+          onClick={() => onCancel(reservation)}
           loading={cancelLoading}
           className="text-red-400 border-red-400 hover:bg-red-400/10"
         >
@@ -210,6 +216,71 @@ const UserReservationCard = ({
 );
 
 export default UserReservationCard;
+
+// Success Modal for Reservation
+const SuccessModal = ({
+  tableName,
+  date,
+  timeStart,
+  timeEnd,
+  peopleCount,
+  onClose,
+}: {
+  tableName: string;
+  date: string;
+  timeStart: string;
+  timeEnd: string;
+  peopleCount: number;
+  onClose: () => void;
+}) => (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="glass-sheen rounded-3xl p-8 max-w-md w-full"
+    >
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center">
+          <CheckIcon className="w-8 h-8 text-emerald-400" />
+        </div>
+        
+        <h3 className="text-2xl font-bold text-white">
+          تم تأكيد الحجز بنجاح!
+        </h3>
+        
+        <p className="text-white/70">
+          تم تأكيد حجز الطاولة {tableName} بنجاح. ننتظرك في الوقت المحدد!
+        </p>
+        
+        <div className="text-sm text-white/60 bg-white/5 rounded-xl p-4 space-y-2">
+          <p>
+            <span className="text-white/80">الطاولة:</span> {tableName}
+          </p>
+          <p>
+            <span className="text-white/80">التاريخ:</span> {new Date(date).toLocaleDateString("ar-EG")}
+          </p>
+          <p>
+            <span className="text-white/80">الوقت:</span> {new Date(timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
+            {new Date(timeEnd).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+          </p>
+          <p>
+            <span className="text-white/80">عدد الأفراد:</span> {peopleCount}
+          </p>
+        </div>
+        
+        <div className="pt-4">
+          <Button
+            onClick={onClose}
+            className="w-full bg-emerald-500 hover:bg-emerald-600 border-emerald-500"
+          >
+            <CheckIcon className="w-4 h-4 ml-2" />
+            تم
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  </div>
+);
 
 // Confirmation Modal for Cancellation
 const CancelConfirmationModal = ({
@@ -317,6 +388,13 @@ export const ReservationsPage = () => {
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [cancellingReservation, setCancellingReservation] = useState<Reservation | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [successReservation, setSuccessReservation] = useState<{
+    tableName: string;
+    date: string;
+    timeStart: string;
+    timeEnd: string;
+    peopleCount: number;
+  } | null>(null);
 
   const timeSlots = useMemo(
     () => [
@@ -348,11 +426,40 @@ export const ReservationsPage = () => {
     setSearchForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Helper function to convert time string to minutes for comparison
+  const timeToMinutes = (timeStr: string): number => {
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':');
+    let hour24 = parseInt(hours);
+    if (period === 'PM' && hour24 !== 12) hour24 += 12;
+    if (period === 'AM' && hour24 === 12) hour24 = 0;
+    return hour24 * 60 + parseInt(minutes);
+  };
+
   const handleReservationFormChange = (
     field: keyof ReservationFormData,
     value: string | number | TableClass | undefined
   ) => {
-    setReservationForm((prev) => ({ ...prev, [field]: value }));
+    setReservationForm((prev) => {
+      const updated = { ...prev, [field]: value };
+      
+      // If start time changes and end time is now invalid, reset end time
+      if (field === 'timeStart' && typeof value === 'string' && updated.timeEnd) {
+        const startMinutes = timeToMinutes(value);
+        const endMinutes = timeToMinutes(updated.timeEnd);
+        if (endMinutes <= startMinutes) {
+          // Find the next available time slot after start time
+          const startIndex = timeSlots.findIndex(slot => slot === value);
+          if (startIndex >= 0 && startIndex < timeSlots.length - 1) {
+            updated.timeEnd = timeSlots[startIndex + 1];
+          } else {
+            updated.timeEnd = '';
+          }
+        }
+      }
+      
+      return updated;
+    });
   };
 
   const fetchTables = useCallback(async () => {
@@ -454,6 +561,20 @@ const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
       return endMinutes - startMinutes;
     };
 
+    // Validate that end time is after start time
+    if (reservationForm.timeEnd) {
+      const startMinutes = timeToMinutes(reservationForm.timeStart);
+      const endMinutes = timeToMinutes(reservationForm.timeEnd);
+      if (endMinutes <= startMinutes) {
+        setFeedback({
+          type: "error",
+          message: "وقت النهاية يجب أن يكون بعد وقت البداية.",
+        });
+        setLoading(false);
+        return;
+      }
+    }
+
     const timeStart24 = convertTimeTo24Hour(reservationForm.timeStart);
     const timeStartIso = new Date(`${reservationForm.date}T${timeStart24}:00`).toISOString();
     const durationMinutes = reservationForm.timeEnd 
@@ -481,9 +602,18 @@ const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
       throw new Error(`Failed to confirm reservation: ${errorText}`);
     }
 
-    setFeedback({
-      type: "success",
-      message: "تم تأكيد الحجز بنجاح! ننتظرك.",
+    // Calculate timeEnd from timeStart and duration
+    const timeEndDate = new Date(timeStartIso);
+    timeEndDate.setMinutes(timeEndDate.getMinutes() + durationMinutes);
+    const timeEndIso = timeEndDate.toISOString();
+
+    // Show success modal with reservation details
+    setSuccessReservation({
+      tableName: selectedTable.name,
+      date: reservationForm.date,
+      timeStart: timeStartIso,
+      timeEnd: timeEndIso,
+      peopleCount: Number(reservationForm.guests),
     });
 
     setIsConfirming(false);
@@ -572,6 +702,20 @@ const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
       });
       setLoading(false);
       return;
+    }
+
+    // Validate that end time is after start time
+    if (reservationForm.timeEnd) {
+      const startMinutes = timeToMinutes(timeStartValue);
+      const endMinutes = timeToMinutes(reservationForm.timeEnd);
+      if (endMinutes <= startMinutes) {
+        setFeedback({
+          type: "error",
+          message: "وقت النهاية يجب أن يكون بعد وقت البداية.",
+        });
+        setLoading(false);
+        return;
+      }
     }
 
     const timeStart24 = convertTimeTo24Hour(timeStartValue);
@@ -848,11 +992,18 @@ const renderConfirmationForm = () => (
             }
             className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
           >
-            {timeSlots.map((slot) => (
-              <option key={slot} value={slot} className="bg-night">
-                {slot}
-              </option>
-            ))}
+            {timeSlots
+              .filter((slot) => {
+                if (!reservationForm.timeStart) return true;
+                const startMinutes = timeToMinutes(reservationForm.timeStart);
+                const slotMinutes = timeToMinutes(slot);
+                return slotMinutes > startMinutes;
+              })
+              .map((slot) => (
+                <option key={slot} value={slot} className="bg-night">
+                  {slot}
+                </option>
+              ))}
           </select>
         </label>
       </div>
@@ -1141,6 +1292,18 @@ const renderConfirmationForm = () => (
             onConfirm={() => handleCancelReservation(cancellingReservation._id)}
             onCancel={hideCancelConfirmation}
             loading={cancelLoading}
+          />
+        )}
+
+        {/* Modal نجاح الحجز */}
+        {successReservation && (
+          <SuccessModal
+            tableName={successReservation.tableName}
+            date={successReservation.date}
+            timeStart={successReservation.timeStart}
+            timeEnd={successReservation.timeEnd}
+            peopleCount={successReservation.peopleCount}
+            onClose={() => setSuccessReservation(null)}
           />
         )}
       </section>

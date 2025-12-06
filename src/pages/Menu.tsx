@@ -14,11 +14,18 @@ const categoryOrder: MenuCategory[] = [
   "Drinks",
 ];
 
+const SearchIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+);
+
 export const MenuPage = () => {
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<MenuCategory | "All">(
     "All"
   );
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,11 +46,25 @@ export const MenuPage = () => {
   }, []);
 
   const filteredMenu = useMemo(() => {
-    if (activeCategory === "All") {
-      return menu;
+    let filtered = menu;
+
+    // Filter by category
+    if (activeCategory !== "All") {
+      filtered = filtered.filter((item) => item.category === activeCategory);
     }
-    return menu.filter((item) => item.category === activeCategory);
-  }, [activeCategory, menu]);
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(
+        (item) =>
+          item.title.toLowerCase().includes(query) ||
+          item.description.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [activeCategory, menu, searchQuery]);
 
   const groupedMenu = useMemo(() => {
     if (activeCategory !== "All") {
@@ -67,7 +88,34 @@ export const MenuPage = () => {
           description="كل طبق معمول بعناية من مكونات مميزة، عشان تتاكل وتفضل في ذهنك."
         />
 
-        <div className="mt-10 flex flex-wrap gap-3">
+        {/* Search Input */}
+        <div className="mt-10">
+          <div className="relative">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40">
+              <SearchIcon className="w-5 h-5" />
+            </div>
+            <input
+              type="text"
+              placeholder="ابحث عن طبق أو وصف..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 pr-12 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                aria-label="Clear search"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-3">
           {(["All", ...categoryOrder] as const).map((category) => (
             <Button
               key={category}
@@ -88,8 +136,9 @@ export const MenuPage = () => {
 
         {!loading && filteredMenu.length === 0 && !error && (
           <p className="mt-10 text-sm text-white/60">
-            No dishes available in this category right now. Please check back
-            soon.
+            {searchQuery
+              ? "لم يتم العثور على أطباق تطابق البحث."
+              : "لا توجد أطباق متاحة في هذه الفئة حالياً. يرجى المحاولة لاحقاً."}
           </p>
         )}
 

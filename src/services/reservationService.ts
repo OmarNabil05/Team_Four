@@ -75,8 +75,11 @@ export const updateReservation = async (reservationId: string, reservationData: 
 };
 export const cancelReservation = async (reservationId: string): Promise<void> => {
   const res = await fetch(`${env.apiUrl}/reservations/${reservationId}`, {
-    method: 'DELETE', // أو حسب endpoint الباك
+    method: 'DELETE',
   });
 
-  if (!res.ok) throw new Error('Failed to cancel reservation');
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to cancel reservation: ${errorText}`);
+  }
 };

@@ -14,31 +14,31 @@ const socials = [
 export const Footer = () => {
   return (
     <footer className="relative mt-24 border-t border-white/10 bg-nightLight/80 py-16">
-      <div className="pointer-events-none absolute inset-x-0 -top-16 h-32 bg-gradient-to-t from-nightLight/70 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 -top-16 h-32 bg-gradient-to-t from-nightLight/70 to-transparent" /> {/* shadow */}
       <div className="relative mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-3 lg:px-10">
         {/* Logo + Description */}
         <div className="space-y-4">
-          <p className="font-display text-3xl uppercase tracking-[0.3em] text-accent">
+          <p className="font-display text-3xl   text-accent">
             Spot
           </p>
           <p className="text-sm text-white/60">
             تجربة أكل فاخرة في قلب القاهرة. أطباق موسمية، مكسات مميزة، وتجربة
             مخصوص معمولة بحب.
           </p>
-          <p className="text-sm uppercase tracking-[0.3em] text-white/40">
-            © {new Date().getFullYear()} Spot Egypt
+          <p className="text-sm  text-white/40">
+            © 2025 Spot Egypt
           </p>
         </div>
 
         {/* Visit Section */}
         <div className="space-y-3 text-sm text-white/70">
-          <p className="text-xl uppercase tracking-[0.3em] text-accent/80">
+          <p className="text-xl  text-accent/80">
             زورنا
           </p>
           <p>شارع 26 يوليو، الزمالك، القاهرة</p>
           <p>يومياً · 5:00 مساءً – 12:00 منتصف الليل</p>
           <a
-            href="https://wa.me/201234567890"
+            href="https://wa.me/201066183563"
             target="_blank"
             rel="noopener noreferrer"
             className="block text-accent transition hover:text-accent/70"
@@ -76,7 +76,7 @@ export const Footer = () => {
 
           {/* Social */}
           <div className="pt-4">
-            <p className="text-xl uppercase tracking-[0.3em] text-accent/80">
+            <p className="text-xl  text-accent/80">
               السوشيال
             </p>
             <div className="mt-3 flex flex-col gap-2">

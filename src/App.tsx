@@ -3,7 +3,6 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
-import { ScrollToTop } from './components/common/ScrollToTop';
 import { HomePage } from './pages/Home';
 import { AboutPage } from './pages/About';
 import { MenuPage } from './pages/Menu';
@@ -15,9 +14,6 @@ const App = () => {
 
   return (
     <div className="relative min-h-screen bg-night text-white">
-      <div className="pointer-events-none fixed inset-0 bg-grid-overlay [background-size:48px_48px] opacity-20" />
-      <div className="pointer-events-none fixed inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
-      <ScrollToTop />
       <Navbar />
       <main className="relative z-10">
         <AnimatePresence mode="wait">

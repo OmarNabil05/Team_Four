@@ -59,7 +59,7 @@ export const ContactPage = () => {
             className="space-y-6"
           >
             <SectionHeading
-              align="left"
+              align="right"
               eyebrow="تواصل معانا"
               title="تعالى اتعرف على خدمة Spot Concierge"
               description="سواء ناويين تعملوا مناسبة صغيرة، إحنا هنا عشان نساعدكم."

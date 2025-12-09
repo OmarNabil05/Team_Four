@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import { PageTransition } from "../components/common/PageTransition";
 import { SectionHeading } from "../components/common/SectionHeading";
 import type { MenuItem } from "../types";
-import { fetchMenu } from "../services/menuService";
 import bg1 from "../assets/imgs/bg1.webp";
 import chef from "../assets/imgs/chef.jpg";
 import steak from "../assets/imgs/steak.jpg";
@@ -38,10 +36,7 @@ const fallbackFeatured: MenuItem[] = [
     price: 580,
     category: "Main Courses",
     imageUrl: steak,
-    isFeatured: true,
     isAvailable: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
   {
     _id: "2",
@@ -51,10 +46,7 @@ const fallbackFeatured: MenuItem[] = [
     price: 180,
     category: "Appetizers",
     imageUrl: Appetizers,
-    isFeatured: true,
     isAvailable: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
   {
     _id: "3",
@@ -64,31 +56,12 @@ const fallbackFeatured: MenuItem[] = [
     price: 160,
     category: "Desserts",
     imageUrl: dessert,
-    isFeatured: true,
     isAvailable: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
 ];
 
 export const HomePage = () => {
-  const [featured, setFeatured] = useState<MenuItem[]>(fallbackFeatured);
-
-  useEffect(() => {
-    const loadMenu = async () => {
-      try {
-        const menu = await fetchMenu();
-        const highlighted = menu.filter((item) => item.isFeatured).slice(0, 4);
-        if (highlighted.length) {
-          setFeatured(highlighted);
-        }
-      } catch (error) {
-        console.error("Unable to load menu highlights", error);
-      }
-    };
-
-    void loadMenu();
-  }, []);
+  const featured = fallbackFeatured;
 
   return (
     <PageTransition>
@@ -117,7 +90,7 @@ export const HomePage = () => {
             transition={{ delay: 0.4, duration: 0.7 }}
             className=" text-3xl leading-tight tracking-wide text-white sm:text-6xl lg:text-7xl"
           >
-            لما الأكل الراقي يقابل لحظة الغروب الساحرة{" "}
+            لما الأكل الراقي يقابل لحظة الغروب الساحرة
           </motion.h2>
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
@@ -236,7 +209,7 @@ export const HomePage = () => {
             className="space-y-6"
           >
             <SectionHeading
-              align="left"
+              align="right"
               eyebrow="الشيف كريم محمود"
               title="صنع ذكريات تتعدى الطبق"
               description="بعد أكتر من عشر سنين في مطاعم مصرية وعالمية، الشيف كريم بيقود Spot بفلسفة مبنية على النار، المواسم، وقصة ورا كل طبق."
@@ -272,7 +245,7 @@ export const HomePage = () => {
           <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[url('https://images.unsplash.com/photo-1532634896-26909d0d4b3e?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center opacity-40 lg:block" />
           <div className="relative max-w-2xl space-y-6">
             <SectionHeading
-              align="left"
+              align="right"
               eyebrow="الحجز"
               title="احجز سهرتك في Spot"
               description="عدد المقاعد محدود كل ليلة عشان كل التفاصيل تاخد حقها من الاهتمام."

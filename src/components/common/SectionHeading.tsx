@@ -6,7 +6,7 @@ type SectionHeadingProps = {
   eyebrow?: string;
   title: string;
   description?: ReactNode;
-  align?: "left" | "center";
+  align?: "right" | "center";
   className?: string;
 };
 
@@ -29,11 +29,11 @@ export const SectionHeading = ({
       )}
     >
       {eyebrow && (
-        <p className="text-xl  tracking-[0.3em] text-accent/80">
+        <p className="text-xl  text-accent/80">
           {eyebrow}
         </p>
       )}
-      <h2 className=" text-4xl  tracking-wide text-white sm:text-5xl">
+      <h2 className=" text-4xl  text-white sm:text-5xl">
         {title}
       </h2>
       {description && <p className="text-lg text-white/70 py-3">{description}</p>}

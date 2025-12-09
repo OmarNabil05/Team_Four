@@ -5,15 +5,18 @@ import { PageTransition } from "../components/common/PageTransition";
 import { SectionHeading } from "../components/common/SectionHeading";
 import { Button } from "../components/ui/Button";
 import type {
-  ReservationInput,
-  ReservationFormData,
   TableItem,
   AvailableTableSearch,
   Reservation,
   TableClass,
 } from "../types";
 import clsx from "clsx";
-import { fetchTables,fetchUserReservations,updateReservation,cancelReservation,confirmReservation as confirmReservationService } from "../services/reservationService";
+import {
+  fetchTables,
+  fetchUserReservations,
+  updateReservation,
+  cancelReservation,
+} from "../services/reservationService";
 import env from "../config/env";
 
 
@@ -61,7 +64,9 @@ const CheckIcon = ({ className }: { className?: string }) => (
 );
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const fetchAvailableTables = async (search: AvailableTableSearch): Promise<TableItem[]> => {
+export const fetchAvailableTables = async (
+  search: AvailableTableSearch
+): Promise<TableItem[]> => {
   const tables = await fetchTables();
 
   return tables.filter(table => {
@@ -130,9 +135,9 @@ const TableCard = ({
 
 
 interface UserReservationCardProps {
-  reservation: Reservation;
-  onEdit: (reservation: Reservation) => void;
-  onCancel: (reservation: Reservation) => void;
+  reservation: ReservationView;
+  onEdit: (reservation: ReservationView) => void;
+  onCancel: (reservation: ReservationView) => void;
   cancelLoading?: boolean;
 }
 
@@ -152,19 +157,20 @@ const UserReservationCard = ({
     <div className="flex items-center justify-between">
       <h3 className="text-xl font-semibold text-white flex items-center">
         <TableIcon className="w-6 h-6 mr-2 text-accent" />
-        حجز الطاولة {reservation.table.name}
+        حجز الطاولة {reservation.table?.name ?? reservation.tableId}
       </h3>
       <span
         className={clsx(
           "px-3 py-1 text-xs font-medium rounded-full",
-          reservation.status === "accepted" && "bg-emerald-500/20 text-emerald-400",
+          reservation.status === "confirmed" && "bg-emerald-500/20 text-emerald-400",
           reservation.status === "pending" && "bg-yellow-500/20 text-yellow-400",
-          reservation.status === "refused" && "bg-red-500/20 text-red-400"
+          reservation.status === "cancelled" && "bg-red-500/20 text-red-400"
         )}
       >
-        {reservation.status === "accepted" && "مؤكد"}
+        {reservation.status === "confirmed" && "مؤكد"}
         {reservation.status === "pending" && "قيد الانتظار"}
-        {reservation.status === "refused" && "ملغي"}
+        {reservation.status === "cancelled" && "ملغي"}
+        {reservation.status === "completed" && "مكتمل"}
       </span>
     </div>
 
@@ -177,7 +183,7 @@ const UserReservationCard = ({
       <p className="flex items-center">
         <ClockIcon className="w-4 h-4 ml-2" />
         الوقت: {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
-        {new Date(reservation.timeEnd).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+        {new Date(reservation.timeEnd ?? reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
       </p>
       <p className="flex items-center">
         <UsersIcon className="w-4 h-4 ml-2" />
@@ -200,7 +206,7 @@ const UserReservationCard = ({
         تعديل
       </Button>
 
-      {reservation.status !== "refused" && (
+      {reservation.status !== "cancelled" && (
         <Button
           variant="outline"
           onClick={() => onCancel(reservation)}
@@ -289,7 +295,7 @@ const CancelConfirmationModal = ({
   onCancel,
   loading,
 }: {
-  reservation: Reservation;
+  reservation: ReservationView;
   onConfirm: () => void;
   onCancel: () => void;
   loading: boolean;
@@ -310,7 +316,7 @@ const CancelConfirmationModal = ({
         </h3>
         
         <p className="text-white/70">
-          هل أنت متأكد من أنك تريد إلغاء حجز الطاولة {reservation.table.name}؟
+          هل أنت متأكد من أنك تريد إلغاء حجز الطاولة {reservation.table?.name ?? reservation.tableId}؟
         </p>
         
         <div className="text-sm text-white/60 bg-white/5 rounded-xl p-4">
@@ -319,7 +325,7 @@ const CancelConfirmationModal = ({
           </p>
           <p>
             الوقت: {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
-            {new Date(reservation.timeEnd).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+            {new Date(reservation.timeEnd ?? reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
           </p>
           <p>
             عدد الأفراد: {reservation.peopleCount}
@@ -358,6 +364,31 @@ const initialSearch: AvailableTableSearch = {
   tableClass: undefined,
 };
 
+type ReservationFormData = {
+  name: string;
+  email: string;
+  phone: string;
+  date: string;
+  time: string;
+  timeStart: string;
+  endTime: string;
+  timeEnd: string;
+  guests: number;
+  message: string;
+  tableClass?: TableClass;
+};
+
+type ReservationView = Reservation & {
+  _id?: string;
+  table?: { _id: string; name: string };
+  timeEnd?: string;
+  durationMinutes?: number;
+  guests?: number;
+};
+
+const getReservationId = (reservation: ReservationView) =>
+  reservation.id ?? reservation._id ?? "";
+
 const initialReservationForm: ReservationFormData = {
   name: "",
   email: "",
@@ -376,17 +407,18 @@ export const ReservationsPage = () => {
   const [activeTab, setActiveTab] = useState<"new" | "my">("new");
   const [searchForm, setSearchForm] = useState<AvailableTableSearch>(initialSearch);
   const [availableTables, setAvailableTables] = useState<TableItem[]>([]);
-  const [userReservations, setUserReservations] = useState<Reservation[]>([]);
+  const [userReservations, setUserReservations] = useState<ReservationView[]>([]);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
   const [selectedTable, setSelectedTable] = useState<TableItem | null>(null);
-  const [reservationForm, setReservationForm] = useState<ReservationFormData>(initialReservationForm);
+  const [reservationForm, setReservationForm] =
+    useState<ReservationFormData>(initialReservationForm);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
-  const [cancellingReservation, setCancellingReservation] = useState<Reservation | null>(null);
+  const [editingReservation, setEditingReservation] = useState<ReservationView | null>(null);
+  const [cancellingReservation, setCancellingReservation] = useState<ReservationView | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [successReservation, setSuccessReservation] = useState<{
     tableName: string;
@@ -440,7 +472,7 @@ export const ReservationsPage = () => {
     field: keyof ReservationFormData,
     value: string | number | TableClass | undefined
   ) => {
-    setReservationForm((prev) => {
+    setReservationForm((prev: ReservationFormData) => {
       const updated = { ...prev, [field]: value };
       
       // If start time changes and end time is now invalid, reset end time
@@ -475,6 +507,7 @@ export const ReservationsPage = () => {
           message: "لا توجد طاولات متاحة بالمعايير المحددة.",
         });
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setFeedback({
         type: "error",
@@ -489,8 +522,12 @@ export const ReservationsPage = () => {
     setLoading(true);
     try {
       const reservations = await fetchUserReservations("dummy_user_id");
-      setUserReservations(reservations);
-    } catch (error) {
+      setUserReservations(
+        reservations.map((res: ReservationView) => ({
+          ...res,
+        }))
+      );
+    } catch {
       setFeedback({
         type: "error",
         message: "حدث خطأ أثناء جلب حجوزاتك.",
@@ -518,7 +555,7 @@ export const ReservationsPage = () => {
       endTime: searchForm.endTime,
       timeEnd: searchForm.endTime,
       guests: searchForm.guests,
-      tableClass: table.class,
+      tableClass: table.category as TableClass | undefined,
     }));
     setIsConfirming(true);
   };
@@ -636,7 +673,7 @@ const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
 
 
 
-const handleEditReservation = (reservation: Reservation) => {
+const handleEditReservation = (reservation: ReservationView) => {
   setEditingReservation(reservation);
   const timeStartDate = reservation.timeStart ? new Date(reservation.timeStart) : null;
   const timeEndDate = reservation.timeEnd ? new Date(reservation.timeEnd) : null;
@@ -727,7 +764,7 @@ const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
     // حضر payload بالشكل المطلوب
     const payload = {
       customerName: reservationForm.name,
-      tableId: editingReservation.table._id,
+      tableId: editingReservation.tableId,
       timeStart: timeStartIso,
       durationMinutes: durationMinutes,
       peopleCount: Number(reservationForm.guests),
@@ -735,7 +772,7 @@ const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
     };
 
     // استدعاء الدالة لتحديث الحجز
-    await updateReservation(editingReservation._id, payload);
+    await updateReservation(getReservationId(editingReservation), payload);
 
     setFeedback({
       type: "success",
@@ -899,7 +936,7 @@ const renderConfirmationForm = () => (
     className="glass-sheen rounded-3xl p-10 space-y-6"
   >
     <SectionHeading
-      align="left"
+      align="right"
       eyebrow="تأكيد الحجز"
       title={`تأكيد حجز الطاولة ${selectedTable?.name}`}
       description="يرجى إدخال بياناتك لتأكيد الحجز."
@@ -1059,11 +1096,17 @@ const renderConfirmationForm = () => (
       <div className="grid gap-6 md:grid-cols-2">
         {userReservations.map((reservation) => (
           <UserReservationCard
-            key={reservation._id}
+            key={getReservationId(reservation)}
             reservation={reservation}
             onEdit={handleEditReservation}
             onCancel={showCancelConfirmation}
-            cancelLoading={cancelLoading && cancellingReservation?._id === reservation._id}
+            cancelLoading={
+              !!(
+                cancelLoading &&
+                cancellingReservation &&
+                getReservationId(cancellingReservation) === getReservationId(reservation)
+              )
+            }
           />
         ))}
       </div>
@@ -1077,7 +1120,7 @@ const renderConfirmationForm = () => (
       className="glass-sheen rounded-3xl p-10 space-y-6"
     >
       <SectionHeading
-        align="left"
+      align="right"
         eyebrow="تعديل الحجز"
         title={`تعديل حجز الطاولة ${editingReservation?.tableId}`}
         description="يمكنك تعديل عدد الأفراد أو الملاحظات."
@@ -1098,7 +1141,7 @@ const renderConfirmationForm = () => (
             <input
               type="number"
               min={1}
-              max={editingReservation?.guests || 12}
+              max={editingReservation?.peopleCount || 12}
               required
               value={reservationForm.guests}
               onChange={(event) =>
@@ -1156,7 +1199,7 @@ const renderConfirmationForm = () => (
             className="glass-sheen rounded-3xl p-10"
           >
             <SectionHeading
-              align="left"
+              align="right"
               eyebrow="الحجوزات"
               title="احجز أمسياتك"
               description="ابحث عن طاولتك المفضلة أو راجع حجوزاتك الحالية."
@@ -1241,7 +1284,7 @@ const renderConfirmationForm = () => (
           >
             <div className="glass-sheen rounded-3xl p-10">
               <SectionHeading
-                align="left"
+                align="right"
                 eyebrow="الكونسيرج"
                 title="بنجهزلك أمسيات على حسب ذوقك"
               />
@@ -1289,7 +1332,7 @@ const renderConfirmationForm = () => (
         {cancellingReservation && (
           <CancelConfirmationModal
             reservation={cancellingReservation}
-            onConfirm={() => handleCancelReservation(cancellingReservation._id)}
+            onConfirm={() => handleCancelReservation(getReservationId(cancellingReservation))}
             onCancel={hideCancelConfirmation}
             loading={cancelLoading}
           />

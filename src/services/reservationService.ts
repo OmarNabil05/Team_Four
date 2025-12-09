@@ -10,7 +10,13 @@ export const fetchTables = async (): Promise<TableItem[]> => {
   if (!res.ok) throw new Error('Failed to fetch tables');
   const data = await res.json();
 
-  return data.map((item: any) => ({
+  return data.map((item: {
+    _id: string;
+    name: string;
+    category: string;
+    maxSeats: number;
+    reserved: boolean;
+  }) => ({
     _id: item._id,
     name: item.name,
     category: item.category,
@@ -34,16 +40,14 @@ export const confirmReservation = async (
   tableId: string,
   reservationData: ReservationInput
 ): Promise<void> => {
-  const timeStartIso = new Date(
-    `${reservationData.date}T${reservationData.time}:00`
-  ).toISOString();
-
   const bodyToSend = {
     tableId,
-    customerName: reservationData.name, // مهم جداً
-    timeStart: timeStartIso,
-    durationMinutes: 120, // ثابت أو من reservationData لو عندك
-    peopleCount: reservationData.guests, // مهم جداً
+    customerName: reservationData.customerName,
+    timeStart: reservationData.timeStart,
+    durationMinutes: 120, 
+    peopleCount: reservationData.peopleCount,
+    message: reservationData.message,
+    status: reservationData.status,
   };
 
   const res = await fetch(`${env.apiUrl}/reservations`, {

@@ -93,7 +93,7 @@ export const AboutPage = () => {
             className="space-y-6"
           >
             <SectionHeading
-              align="left"
+              align="right"
               eyebrow="فلسفتنا"
               title="أكل مستوحى من الغروب والأرض والملمس"
             />

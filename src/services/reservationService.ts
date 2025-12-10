@@ -1,9 +1,6 @@
 import env from '../config/env';
 import type { TableItem, Reservation, ReservationInput } from '../types';
 
-
-
-
 // جلب كل الطاولات
 export const fetchTables = async (): Promise<TableItem[]> => {
   const res = await fetch(`${env.apiUrl}/tables`);
@@ -67,7 +64,7 @@ export const confirmReservation = async (
 
 export const updateReservation = async (reservationId: string, reservationData: Partial<ReservationInput> & { durationMinutes?: number }): Promise<void> => {
   const res = await fetch(`${env.apiUrl}/reservations/${reservationId}`, {
-    method: 'PUT', // أو PATCH حسب الباك
+    method: 'PUT', 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(reservationData),
   });

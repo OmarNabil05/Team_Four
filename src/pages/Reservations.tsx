@@ -4,6 +4,12 @@ import { motion } from "framer-motion";
 import { PageTransition } from "../components/common/PageTransition";
 import { SectionHeading } from "../components/common/SectionHeading";
 import { Button } from "../components/ui/Button";
+import { FaPen } from "react-icons/fa";
+import { MdTableRestaurant } from "react-icons/md";
+import { FaRegCalendarDays } from "react-icons/fa6";
+
+import { FaClock ,FaUser ,FaTrash ,FaCheckCircle} from "react-icons/fa";
+
 import type {
   TableItem,
   AvailableTableSearch,
@@ -20,65 +26,20 @@ import {
 import env from "../config/env";
 
 
-// أيقونات بديلة
-const TableIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-  </svg>
-);
-
-const CalendarIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-
-const ClockIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const UsersIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-  </svg>
-);
-
-const PencilIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-  </svg>
-);
-
-const TrashIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-  </svg>
-);
-
-const CheckIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-);
-
 // eslint-disable-next-line react-refresh/only-export-components
 export const fetchAvailableTables = async (
   search: AvailableTableSearch
 ): Promise<TableItem[]> => {
   const tables = await fetchTables();
 
-  return tables.filter(table => {
+  return tables.filter((table) => {
     if (table.maxSeats < search.guests) return false;
     if (search.tableClass && table.category !== search.tableClass) return false;
     if (table.reserved) return false;
 
-    // لو في API للحجوزات ممكن نعمل fetch عليها ونشيك التواقيت
     return true;
   });
 };
-
 
 // Helper component for the Table Card
 const TableCard = ({
@@ -90,49 +51,50 @@ const TableCard = ({
   onReserve: (table: TableItem) => void;
   isReserved: boolean;
 }) => (
- <motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.3 }}
-  className={clsx(
-    "glass-sheen rounded-xl p-6 space-y-3 cursor-pointer transition-all duration-300",
-    isReserved
-      ? "border-2 border-emerald-500 bg-emerald-900/30"
-      : !table.reserved
-      ? "hover:border-accent/60 border border-white/10"
-      : "opacity-50 cursor-not-allowed border border-white/10"
-  )}
-  onClick={() => !table.reserved && !isReserved && onReserve(table)}
->
-  <div className="flex items-center justify-between">
-    <h3 className="text-xl font-semibold text-white flex items-center">
-      <TableIcon className="w-6 h-6 mr-2 text-accent" />
-      {table.name}
-    </h3>
-    <span
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className={clsx(
+      "glass-sheen rounded-xl p-6 space-y-3 cursor-pointer transition-all duration-300",
+      isReserved
+        ? "border-2 border-emerald-500 bg-emerald-900/30"
+        : !table.reserved
+        ? "hover:border-accent/60 border border-white/10"
+        : "opacity-50 cursor-not-allowed border border-white/10"
+    )}
+    onClick={() => !table.reserved && !isReserved && onReserve(table)}
+  >
+    <div className="flex items-center justify-between">
+      <h3 className="text-xl font-semibold text-white flex items-center">
+        <MdTableRestaurant className="w-8 h-8 text-emerald-400" />
+        {table.name}
+      </h3>
+      <span
+        className={clsx(
+          "px-3 py-1 text-xs font-medium rounded-full",
+          table.category === "a" && "bg-red-500/20 text-red-400",
+          table.category === "b" && "bg-yellow-500/20 text-yellow-400",
+          table.category === "c" && "bg-blue-500/20 text-blue-400",
+          table.category === "d" && "bg-purple-500/20 text-purple-400"
+        )}
+      >
+        كلاس {table.category}
+      </span>
+    </div>
+    <p className="text-sm text-white/70">سعة: {table.maxSeats} أفراد</p>
+    <p
       className={clsx(
-        "px-3 py-1 text-xs font-medium rounded-full",
-        table.category === "a" && "bg-red-500/20 text-red-400",
-        table.category === "b" && "bg-yellow-500/20 text-yellow-400",
-        table.category === "c" && "bg-blue-500/20 text-blue-400",
-        table.category === "d" && "bg-purple-500/20 text-purple-400"
+        "text-sm font-medium",
+        !table.reserved ? "text-emerald-400" : "text-red-400"
       )}
     >
-      كلاس {table.category}
-    </span>
-  </div>
-  <p className="text-sm text-white/70">
-    سعة: {table.maxSeats} أفراد
-  </p>
-  <p className={clsx("text-sm font-medium", !table.reserved ? "text-emerald-400" : "text-red-400")}>
-    { !table.reserved ? "متاحة للحجز" : "غير متاحة"}
-  </p>
-</motion.div>
-
+      {!table.reserved ? "متاحة للحجز" : "غير متاحة"}
+    </p>
+  </motion.div>
 );
 
 // Helper component for the User Reservation Card
-
 
 interface UserReservationCardProps {
   reservation: ReservationView;
@@ -156,14 +118,16 @@ const UserReservationCard = ({
     {/* Header */}
     <div className="flex items-center justify-between">
       <h3 className="text-xl font-semibold text-white flex items-center">
-        <TableIcon className="w-6 h-6 mr-2 text-accent" />
+        <MdTableRestaurant className="w-6 h-6 mr-2 text-accent" />
         حجز الطاولة {reservation.table?.name ?? reservation.tableId}
       </h3>
       <span
         className={clsx(
           "px-3 py-1 text-xs font-medium rounded-full",
-          reservation.status === "confirmed" && "bg-emerald-500/20 text-emerald-400",
-          reservation.status === "pending" && "bg-yellow-500/20 text-yellow-400",
+          reservation.status === "confirmed" &&
+            "bg-emerald-500/20 text-emerald-400",
+          reservation.status === "pending" &&
+            "bg-yellow-500/20 text-yellow-400",
           reservation.status === "cancelled" && "bg-red-500/20 text-red-400"
         )}
       >
@@ -177,32 +141,34 @@ const UserReservationCard = ({
     {/* Details */}
     <div className="text-sm text-white/70 space-y-1">
       <p className="flex items-center">
-        <CalendarIcon className="w-4 h-4 ml-2" />
+        <FaRegCalendarDays className="w-4 h-4 ml-2" />
         التاريخ: {new Date(reservation.timeStart).toLocaleDateString("ar-EG")}
       </p>
       <p className="flex items-center">
-        <ClockIcon className="w-4 h-4 ml-2" />
-        الوقت: {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
-        {new Date(reservation.timeEnd ?? reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+        <FaClock className="w-4 h-4 ml-2" />
+        الوقت:{" "}
+        {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}{" "}
+        -{" "}
+        {new Date(
+          reservation.timeEnd ?? reservation.timeStart
+        ).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
       </p>
       <p className="flex items-center">
-        <UsersIcon className="w-4 h-4 ml-2" />
+        <FaUser className="w-4 h-4 ml-2" />
         عدد الأفراد: {reservation.peopleCount}
       </p>
       {reservation.message && (
-        <p className="text-white/60 mt-2">
-          ملاحظات: {reservation.message}
-        </p>
+        <p className="text-white/60 mt-2">ملاحظات: {reservation.message}</p>
       )}
     </div>
 
     {/* Actions */}
     <div className="flex space-x-2 rtl:space-x-reverse pt-2">
-      <Button
-        className="flex-1"
-        onClick={() => onEdit(reservation)}
-      >
-        <PencilIcon className="w-4 h-4 ml-2" />
+      <Button className="flex-1" onClick={() => onEdit(reservation)}>
+        <FaPen />
         تعديل
       </Button>
 
@@ -213,7 +179,7 @@ const UserReservationCard = ({
           loading={cancelLoading}
           className="text-red-400 border-red-400 hover:bg-red-400/10"
         >
-          <TrashIcon className="w-4 h-4 ml-2" />
+          <FaTrash className="w-4 h-4 ml-2" />
           إلغاء
         </Button>
       )}
@@ -247,39 +213,46 @@ const SuccessModal = ({
     >
       <div className="text-center space-y-4">
         <div className="w-16 h-16 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center">
-          <CheckIcon className="w-8 h-8 text-emerald-400" />
+          <FaCheckCircle className="w-8 h-8 text-emerald-400" />
         </div>
-        
-        <h3 className="text-2xl font-bold text-white">
-          تم تأكيد الحجز بنجاح!
-        </h3>
-        
+
+        <h3 className="text-2xl font-bold text-white">تم تأكيد الحجز بنجاح!</h3>
+
         <p className="text-white/70">
           تم تأكيد حجز الطاولة {tableName} بنجاح. ننتظرك في الوقت المحدد!
         </p>
-        
+
         <div className="text-sm text-white/60 bg-white/5 rounded-xl p-4 space-y-2">
           <p>
             <span className="text-white/80">الطاولة:</span> {tableName}
           </p>
           <p>
-            <span className="text-white/80">التاريخ:</span> {new Date(date).toLocaleDateString("ar-EG")}
+            <span className="text-white/80">التاريخ:</span>{" "}
+            {new Date(date).toLocaleDateString("ar-EG")}
           </p>
           <p>
-            <span className="text-white/80">الوقت:</span> {new Date(timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
-            {new Date(timeEnd).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+            <span className="text-white/80">الوقت:</span>{" "}
+            {new Date(timeStart).toLocaleTimeString("ar-EG", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}{" "}
+            -{" "}
+            {new Date(timeEnd).toLocaleTimeString("ar-EG", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </p>
           <p>
             <span className="text-white/80">عدد الأفراد:</span> {peopleCount}
           </p>
         </div>
-        
+
         <div className="pt-4">
           <Button
             onClick={onClose}
             className="w-full bg-emerald-500 hover:bg-emerald-600 border-emerald-500"
           >
-            <CheckIcon className="w-4 h-4 ml-2" />
+            <FaCheckCircle className="w-4 h-4 ml-2" />
             تم
           </Button>
         </div>
@@ -308,45 +281,49 @@ const CancelConfirmationModal = ({
     >
       <div className="text-center space-y-4">
         <div className="w-16 h-16 mx-auto bg-red-500/20 rounded-full flex items-center justify-center">
-          <TrashIcon className="w-8 h-8 text-red-400" />
+          <FaTrash className="w-8 h-8 text-red-400" />
         </div>
-        
-        <h3 className="text-2xl font-bold text-white">
-          تأكيد إلغاء الحجز
-        </h3>
-        
+
+        <h3 className="text-2xl font-bold text-white">تأكيد إلغاء الحجز</h3>
+
         <p className="text-white/70">
-          هل أنت متأكد من أنك تريد إلغاء حجز الطاولة {reservation.table?.name ?? reservation.tableId}؟
+          هل أنت متأكد من أنك تريد إلغاء حجز الطاولة{" "}
+          {reservation.table?.name ?? reservation.tableId}؟
         </p>
-        
+
         <div className="text-sm text-white/60 bg-white/5 rounded-xl p-4">
           <p>
-            التاريخ: {new Date(reservation.timeStart).toLocaleDateString("ar-EG")}
+            التاريخ:{" "}
+            {new Date(reservation.timeStart).toLocaleDateString("ar-EG")}
           </p>
           <p>
-            الوقت: {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} -{" "}
-            {new Date(reservation.timeEnd ?? reservation.timeStart).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+            الوقت:{" "}
+            {new Date(reservation.timeStart).toLocaleTimeString("ar-EG", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}{" "}
+            -{" "}
+            {new Date(
+              reservation.timeEnd ?? reservation.timeStart
+            ).toLocaleTimeString("ar-EG", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </p>
-          <p>
-            عدد الأفراد: {reservation.peopleCount}
-          </p>
+          <p>عدد الأفراد: {reservation.peopleCount}</p>
         </div>
-        
+
         <div className="flex space-x-3 rtl:space-x-reverse pt-4">
           <Button
             onClick={onConfirm}
             loading={loading}
             className="flex-1 bg-red-500 hover:bg-red-600 border-red-500"
           >
-            <TrashIcon className="w-4 h-4 ml-2" />
+            <FaTrash className="w-4 h-4 ml-2" />
             نعم، إلغاء الحجز
           </Button>
-          
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            className="flex-1"
-          >
+
+          <Button variant="outline" onClick={onCancel} className="flex-1">
             إلغاء
           </Button>
         </div>
@@ -354,7 +331,6 @@ const CancelConfirmationModal = ({
     </motion.div>
   </div>
 );
-
 
 const initialSearch: AvailableTableSearch = {
   date: new Date().toISOString().split("T")[0],
@@ -405,20 +381,26 @@ const initialReservationForm: ReservationFormData = {
 
 export const ReservationsPage = () => {
   const [activeTab, setActiveTab] = useState<"new" | "my">("new");
-  const [searchForm, setSearchForm] = useState<AvailableTableSearch>(initialSearch);
+  const [searchForm, setSearchForm] =
+    useState<AvailableTableSearch>(initialSearch);
   const [availableTables, setAvailableTables] = useState<TableItem[]>([]);
-  const [userReservations, setUserReservations] = useState<ReservationView[]>([]);
+  const [userReservations, setUserReservations] = useState<ReservationView[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
   const [selectedTable, setSelectedTable] = useState<TableItem | null>(null);
-  const [reservationForm, setReservationForm] =
-    useState<ReservationFormData>(initialReservationForm);
+  const [reservationForm, setReservationForm] = useState<ReservationFormData>(
+    initialReservationForm
+  );
   const [isConfirming, setIsConfirming] = useState(false);
-  const [editingReservation, setEditingReservation] = useState<ReservationView | null>(null);
-  const [cancellingReservation, setCancellingReservation] = useState<ReservationView | null>(null);
+  const [editingReservation, setEditingReservation] =
+    useState<ReservationView | null>(null);
+  const [cancellingReservation, setCancellingReservation] =
+    useState<ReservationView | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [successReservation, setSuccessReservation] = useState<{
     tableName: string;
@@ -460,11 +442,11 @@ export const ReservationsPage = () => {
 
   // Helper function to convert time string to minutes for comparison
   const timeToMinutes = (timeStr: string): number => {
-    const [time, period] = timeStr.split(' ');
-    const [hours, minutes] = time.split(':');
+    const [time, period] = timeStr.split(" ");
+    const [hours, minutes] = time.split(":");
     let hour24 = parseInt(hours);
-    if (period === 'PM' && hour24 !== 12) hour24 += 12;
-    if (period === 'AM' && hour24 === 12) hour24 = 0;
+    if (period === "PM" && hour24 !== 12) hour24 += 12;
+    if (period === "AM" && hour24 === 12) hour24 = 0;
     return hour24 * 60 + parseInt(minutes);
   };
 
@@ -474,22 +456,26 @@ export const ReservationsPage = () => {
   ) => {
     setReservationForm((prev: ReservationFormData) => {
       const updated = { ...prev, [field]: value };
-      
+
       // If start time changes and end time is now invalid, reset end time
-      if (field === 'timeStart' && typeof value === 'string' && updated.timeEnd) {
+      if (
+        field === "timeStart" &&
+        typeof value === "string" &&
+        updated.timeEnd
+      ) {
         const startMinutes = timeToMinutes(value);
         const endMinutes = timeToMinutes(updated.timeEnd);
         if (endMinutes <= startMinutes) {
           // Find the next available time slot after start time
-          const startIndex = timeSlots.findIndex(slot => slot === value);
+          const startIndex = timeSlots.findIndex((slot) => slot === value);
           if (startIndex >= 0 && startIndex < timeSlots.length - 1) {
             updated.timeEnd = timeSlots[startIndex + 1];
           } else {
-            updated.timeEnd = '';
+            updated.timeEnd = "";
           }
         }
       }
-      
+
       return updated;
     });
   };
@@ -507,7 +493,7 @@ export const ReservationsPage = () => {
           message: "لا توجد طاولات متاحة بالمعايير المحددة.",
         });
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setFeedback({
         type: "error",
@@ -560,271 +546,277 @@ export const ReservationsPage = () => {
     setIsConfirming(true);
   };
 
-const handleConfirmReservation = async (event: FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  if (!selectedTable) return;
+  const handleConfirmReservation = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    if (!selectedTable) return;
 
-  setLoading(true);
-  setFeedback(null);
+    setLoading(true);
+    setFeedback(null);
 
-  try {
-    if (!reservationForm.timeStart) {
-      setFeedback({
-        type: "error",
-        message: "الرجاء تحديد وقت البداية للحجز.",
-      });
-      setLoading(false);
-      return;
-    }
-
-    // Convert time strings to 24-hour format for ISO date
-    const convertTimeTo24Hour = (timeStr: string): string => {
-      const [time, period] = timeStr.split(' ');
-      const [hours, minutes] = time.split(':');
-      let hour24 = parseInt(hours);
-      if (period === 'PM' && hour24 !== 12) hour24 += 12;
-      if (period === 'AM' && hour24 === 12) hour24 = 0;
-      return `${hour24.toString().padStart(2, '0')}:${minutes}`;
-    };
-
-    // Calculate duration in minutes
-    const calculateDuration = (start: string, end: string): number => {
-      const start24 = convertTimeTo24Hour(start);
-      const end24 = convertTimeTo24Hour(end);
-      const [startHour, startMin] = start24.split(':').map(Number);
-      const [endHour, endMin] = end24.split(':').map(Number);
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-      return endMinutes - startMinutes;
-    };
-
-    // Validate that end time is after start time
-    if (reservationForm.timeEnd) {
-      const startMinutes = timeToMinutes(reservationForm.timeStart);
-      const endMinutes = timeToMinutes(reservationForm.timeEnd);
-      if (endMinutes <= startMinutes) {
+    try {
+      if (!reservationForm.timeStart) {
         setFeedback({
           type: "error",
-          message: "وقت النهاية يجب أن يكون بعد وقت البداية.",
+          message: "الرجاء تحديد وقت البداية للحجز.",
         });
         setLoading(false);
         return;
       }
+
+      // Convert time strings to 24-hour format for ISO date
+      const convertTimeTo24Hour = (timeStr: string): string => {
+        const [time, period] = timeStr.split(" ");
+        const [hours, minutes] = time.split(":");
+        let hour24 = parseInt(hours);
+        if (period === "PM" && hour24 !== 12) hour24 += 12;
+        if (period === "AM" && hour24 === 12) hour24 = 0;
+        return `${hour24.toString().padStart(2, "0")}:${minutes}`;
+      };
+
+      // Calculate duration in minutes
+      const calculateDuration = (start: string, end: string): number => {
+        const start24 = convertTimeTo24Hour(start);
+        const end24 = convertTimeTo24Hour(end);
+        const [startHour, startMin] = start24.split(":").map(Number);
+        const [endHour, endMin] = end24.split(":").map(Number);
+        const startMinutes = startHour * 60 + startMin;
+        const endMinutes = endHour * 60 + endMin;
+        return endMinutes - startMinutes;
+      };
+
+      // Validate that end time is after start time
+      if (reservationForm.timeEnd) {
+        const startMinutes = timeToMinutes(reservationForm.timeStart);
+        const endMinutes = timeToMinutes(reservationForm.timeEnd);
+        if (endMinutes <= startMinutes) {
+          setFeedback({
+            type: "error",
+            message: "وقت النهاية يجب أن يكون بعد وقت البداية.",
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      const timeStart24 = convertTimeTo24Hour(reservationForm.timeStart);
+      const timeStartIso = new Date(
+        `${reservationForm.date}T${timeStart24}:00`
+      ).toISOString();
+      const durationMinutes = reservationForm.timeEnd
+        ? calculateDuration(reservationForm.timeStart, reservationForm.timeEnd)
+        : 120; // Default 2 hours
+
+      // حضر payload للباك حسب الشكل المطلوب
+      const payload = {
+        customerName: reservationForm.name,
+        tableId: selectedTable._id,
+        timeStart: timeStartIso,
+        durationMinutes: durationMinutes,
+        peopleCount: Number(reservationForm.guests),
+      };
+
+      // استدعاء الدالة اللي بتعمل POST للباك
+      const res = await fetch(`${env.apiUrl}/reservations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to confirm reservation: ${errorText}`);
+      }
+
+      // Calculate timeEnd from timeStart and duration
+      const timeEndDate = new Date(timeStartIso);
+      timeEndDate.setMinutes(timeEndDate.getMinutes() + durationMinutes);
+      const timeEndIso = timeEndDate.toISOString();
+
+      // Show success modal with reservation details
+      setSuccessReservation({
+        tableName: selectedTable.name,
+        date: reservationForm.date,
+        timeStart: timeStartIso,
+        timeEnd: timeEndIso,
+        peopleCount: Number(reservationForm.guests),
+      });
+
+      setIsConfirming(false);
+      setSelectedTable(null);
+      setReservationForm(initialReservationForm);
+
+      fetchTables();
+      fetchReservations();
+    } catch (error) {
+      console.error("Reservation error:", error);
+      setFeedback({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "حدث خطأ أثناء تأكيد الحجز.",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    const timeStart24 = convertTimeTo24Hour(reservationForm.timeStart);
-    const timeStartIso = new Date(`${reservationForm.date}T${timeStart24}:00`).toISOString();
-    const durationMinutes = reservationForm.timeEnd 
-      ? calculateDuration(reservationForm.timeStart, reservationForm.timeEnd)
-      : 120; // Default 2 hours
-
-    // حضر payload للباك حسب الشكل المطلوب
-    const payload = {
-      customerName: reservationForm.name,
-      tableId: selectedTable._id,
-      timeStart: timeStartIso,
-      durationMinutes: durationMinutes,
-      peopleCount: Number(reservationForm.guests),
-    };
-
-    // استدعاء الدالة اللي بتعمل POST للباك
-    const res = await fetch(`${env.apiUrl}/reservations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Failed to confirm reservation: ${errorText}`);
-    }
-
-    // Calculate timeEnd from timeStart and duration
-    const timeEndDate = new Date(timeStartIso);
-    timeEndDate.setMinutes(timeEndDate.getMinutes() + durationMinutes);
-    const timeEndIso = timeEndDate.toISOString();
-
-    // Show success modal with reservation details
-    setSuccessReservation({
-      tableName: selectedTable.name,
-      date: reservationForm.date,
-      timeStart: timeStartIso,
-      timeEnd: timeEndIso,
-      peopleCount: Number(reservationForm.guests),
-    });
-
-    setIsConfirming(false);
-    setSelectedTable(null);
-    setReservationForm(initialReservationForm);
-
-    fetchTables();
-    fetchReservations();
-  } catch (error) {
-    console.error("Reservation error:", error);
-    setFeedback({
-      type: "error",
-      message: error instanceof Error ? error.message : "حدث خطأ أثناء تأكيد الحجز.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-
-const handleEditReservation = (reservation: ReservationView) => {
-  setEditingReservation(reservation);
-  const timeStartDate = reservation.timeStart ? new Date(reservation.timeStart) : null;
-  const timeEndDate = reservation.timeEnd ? new Date(reservation.timeEnd) : null;
-  
-  // Convert 24-hour time to 12-hour format with AM/PM
-  const formatTime12Hour = (date: Date): string => {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const hour12 = hours % 12 || 12;
-    return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
   };
-  
-  setReservationForm({
-    name: reservation.customerName,
-    email: reservation.email || "",
-    phone: reservation.phone || "",
-    date: timeStartDate ? timeStartDate.toISOString().split("T")[0] : "",
-    time: timeStartDate ? formatTime12Hour(timeStartDate) : "",
-    timeStart: timeStartDate ? formatTime12Hour(timeStartDate) : "",
-    timeEnd: timeEndDate ? formatTime12Hour(timeEndDate) : "",
-    endTime: timeEndDate ? formatTime12Hour(timeEndDate) : "",
-    guests: reservation.peopleCount,
-    message: reservation.message || "",
-  });
-};
 
+  const handleEditReservation = (reservation: ReservationView) => {
+    setEditingReservation(reservation);
+    const timeStartDate = reservation.timeStart
+      ? new Date(reservation.timeStart)
+      : null;
+    const timeEndDate = reservation.timeEnd
+      ? new Date(reservation.timeEnd)
+      : null;
 
-const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  if (!editingReservation) return;
-
-  setLoading(true);
-  setFeedback(null);
-
-  try {
-    // Convert time strings to 24-hour format for ISO date
-    const convertTimeTo24Hour = (timeStr: string): string => {
-      const [time, period] = timeStr.split(' ');
-      const [hours, minutes] = time.split(':');
-      let hour24 = parseInt(hours);
-      if (period === 'PM' && hour24 !== 12) hour24 += 12;
-      if (period === 'AM' && hour24 === 12) hour24 = 0;
-      return `${hour24.toString().padStart(2, '0')}:${minutes}`;
+    // Convert 24-hour time to 12-hour format with AM/PM
+    const formatTime12Hour = (date: Date): string => {
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const period = hours >= 12 ? "PM" : "AM";
+      const hour12 = hours % 12 || 12;
+      return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
     };
 
-    // Calculate duration in minutes
-    const calculateDuration = (start: string, end: string): number => {
-      const start24 = convertTimeTo24Hour(start);
-      const end24 = convertTimeTo24Hour(end);
-      const [startHour, startMin] = start24.split(':').map(Number);
-      const [endHour, endMin] = end24.split(':').map(Number);
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-      return endMinutes - startMinutes;
-    };
+    setReservationForm({
+      name: reservation.customerName,
+      email: reservation.email || "",
+      phone: reservation.phone || "",
+      date: timeStartDate ? timeStartDate.toISOString().split("T")[0] : "",
+      time: timeStartDate ? formatTime12Hour(timeStartDate) : "",
+      timeStart: timeStartDate ? formatTime12Hour(timeStartDate) : "",
+      timeEnd: timeEndDate ? formatTime12Hour(timeEndDate) : "",
+      endTime: timeEndDate ? formatTime12Hour(timeEndDate) : "",
+      guests: reservation.peopleCount,
+      message: reservation.message || "",
+    });
+  };
 
-    const timeStartValue = reservationForm.timeStart || reservationForm.time || "";
-    if (!timeStartValue) {
-      setFeedback({
-        type: "error",
-        message: "الرجاء تحديد وقت البداية للحجز.",
-      });
-      setLoading(false);
-      return;
-    }
+  const handleUpdateReservation = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editingReservation) return;
 
-    // Validate that end time is after start time
-    if (reservationForm.timeEnd) {
-      const startMinutes = timeToMinutes(timeStartValue);
-      const endMinutes = timeToMinutes(reservationForm.timeEnd);
-      if (endMinutes <= startMinutes) {
+    setLoading(true);
+    setFeedback(null);
+
+    try {
+      // Convert time strings to 24-hour format for ISO date
+      const convertTimeTo24Hour = (timeStr: string): string => {
+        const [time, period] = timeStr.split(" ");
+        const [hours, minutes] = time.split(":");
+        let hour24 = parseInt(hours);
+        if (period === "PM" && hour24 !== 12) hour24 += 12;
+        if (period === "AM" && hour24 === 12) hour24 = 0;
+        return `${hour24.toString().padStart(2, "0")}:${minutes}`;
+      };
+
+      // Calculate duration in minutes
+      const calculateDuration = (start: string, end: string): number => {
+        const start24 = convertTimeTo24Hour(start);
+        const end24 = convertTimeTo24Hour(end);
+        const [startHour, startMin] = start24.split(":").map(Number);
+        const [endHour, endMin] = end24.split(":").map(Number);
+        const startMinutes = startHour * 60 + startMin;
+        const endMinutes = endHour * 60 + endMin;
+        return endMinutes - startMinutes;
+      };
+
+      const timeStartValue =
+        reservationForm.timeStart || reservationForm.time || "";
+      if (!timeStartValue) {
         setFeedback({
           type: "error",
-          message: "وقت النهاية يجب أن يكون بعد وقت البداية.",
+          message: "الرجاء تحديد وقت البداية للحجز.",
         });
         setLoading(false);
         return;
       }
+
+      // Validate that end time is after start time
+      if (reservationForm.timeEnd) {
+        const startMinutes = timeToMinutes(timeStartValue);
+        const endMinutes = timeToMinutes(reservationForm.timeEnd);
+        if (endMinutes <= startMinutes) {
+          setFeedback({
+            type: "error",
+            message: "وقت النهاية يجب أن يكون بعد وقت البداية.",
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      const timeStart24 = convertTimeTo24Hour(timeStartValue);
+      const timeStartIso = new Date(
+        `${reservationForm.date}T${timeStart24}:00`
+      ).toISOString();
+      const durationMinutes = reservationForm.timeEnd
+        ? calculateDuration(timeStartValue, reservationForm.timeEnd)
+        : editingReservation.durationMinutes || 120;
+
+      // حضر payload بالشكل المطلوب
+      const payload = {
+        customerName: reservationForm.name,
+        tableId: editingReservation.tableId,
+        timeStart: timeStartIso,
+        durationMinutes: durationMinutes,
+        peopleCount: Number(reservationForm.guests),
+        message: reservationForm.message || "",
+      };
+
+      // استدعاء الدالة لتحديث الحجز
+      await updateReservation(getReservationId(editingReservation), payload);
+
+      setFeedback({
+        type: "success",
+        message: "تم تعديل الحجز بنجاح.",
+      });
+
+      setEditingReservation(null);
+      setReservationForm(initialReservationForm);
+      fetchReservations();
+    } catch (error) {
+      console.error("Update reservation error:", error);
+      setFeedback({
+        type: "error",
+        message: "حدث خطأ أثناء تعديل الحجز.",
+      });
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const timeStart24 = convertTimeTo24Hour(timeStartValue);
-    const timeStartIso = new Date(`${reservationForm.date}T${timeStart24}:00`).toISOString();
-    const durationMinutes = reservationForm.timeEnd 
-      ? calculateDuration(timeStartValue, reservationForm.timeEnd)
-      : editingReservation.durationMinutes || 120;
+  const handleCancelReservation = async (reservationId: string) => {
+    setCancelLoading(true);
+    setFeedback(null);
 
-    // حضر payload بالشكل المطلوب
-    const payload = {
-      customerName: reservationForm.name,
-      tableId: editingReservation.tableId,
-      timeStart: timeStartIso,
-      durationMinutes: durationMinutes,
-      peopleCount: Number(reservationForm.guests),
-      message: reservationForm.message || "",
-    };
+    try {
+      // استدعاء API لإلغاء الحجز
+      await cancelReservation(reservationId);
 
-    // استدعاء الدالة لتحديث الحجز
-    await updateReservation(getReservationId(editingReservation), payload);
+      // إعطاء رسالة نجاح
+      setFeedback({
+        type: "success",
+        message: "تم إلغاء الحجز بنجاح.",
+      });
 
-    setFeedback({
-      type: "success",
-      message: "تم تعديل الحجز بنجاح.",
-    });
+      // إعادة ضبط الـ modal أو أي حالة خاصة بالإلغاء
+      setCancellingReservation(null);
 
-    setEditingReservation(null);
-    setReservationForm(initialReservationForm);
-    fetchReservations();
-  } catch (error) {
-    console.error("Update reservation error:", error);
-    setFeedback({
-      type: "error",
-      message: "حدث خطأ أثناء تعديل الحجز.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-const handleCancelReservation = async (reservationId: string) => {
-  setCancelLoading(true);
-  setFeedback(null);
-
-  try {
-    // استدعاء API لإلغاء الحجز
-    await cancelReservation(reservationId);
-
-    // إعطاء رسالة نجاح
-    setFeedback({
-      type: "success",
-      message: "تم إلغاء الحجز بنجاح.",
-    });
-
-    // إعادة ضبط الـ modal أو أي حالة خاصة بالإلغاء
-    setCancellingReservation(null);
-
-    // تحديث الحجوزات والطاولات بعد الإلغاء
-    await fetchReservations();
-    await fetchTables();
-  } catch (error) {
-    console.error("Cancel reservation error:", error); // سجل الخطأ
-    setFeedback({
-      type: "error",
-      message: "حدث خطأ أثناء إلغاء الحجز.",
-    });
-  } finally {
-    setCancelLoading(false);
-  }
-};
-
+      // تحديث الحجوزات والطاولات بعد الإلغاء
+      await fetchReservations();
+      await fetchTables();
+    } catch (error) {
+      console.error("Cancel reservation error:", error); // سجل الخطأ
+      setFeedback({
+        type: "error",
+        message: "حدث خطأ أثناء إلغاء الحجز.",
+      });
+    } finally {
+      setCancelLoading(false);
+    }
+  };
 
   const showCancelConfirmation = (reservation: Reservation) => {
     setCancellingReservation(reservation);
@@ -834,74 +826,73 @@ const handleCancelReservation = async (reservationId: string) => {
     setCancellingReservation(null);
   };
 
-const renderSearchForm = () => (
-  <div className="space-y-4">
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <label className="text-sm text-white/70">
-        التاريخ
-        <input
-          type="date"
-          min={minDate}
-          required
-          value={searchForm.date}
-          onChange={(event) => handleSearchChange("date", event.target.value)}
-          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-        />
-      </label>
+  const renderSearchForm = () => (
+    <div className="space-y-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <label className="text-sm text-white/70">
+          التاريخ
+          <input
+            type="date"
+            min={minDate}
+            required
+            value={searchForm.date}
+            onChange={(event) => handleSearchChange("date", event.target.value)}
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+          />
+        </label>
+
+        <label className="text-sm text-white/70">
+          عدد الأفراد
+          <input
+            type="number"
+            min={1}
+            max={12}
+            required
+            value={searchForm.guests}
+            onChange={(event) =>
+              handleSearchChange("guests", Number(event.target.value))
+            }
+            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+          />
+        </label>
+      </div>
 
       <label className="text-sm text-white/70">
-        عدد الأفراد
-        <input
-          type="number"
-          min={1}
-          max={12}
-          required
-          value={searchForm.guests}
+        نوع الطاولة (اختياري)
+        <select
+          value={searchForm.tableClass || ""}
           onChange={(event) =>
-            handleSearchChange("guests", Number(event.target.value))
+            handleSearchChange(
+              "tableClass",
+              event.target.value as TableClass | undefined
+            )
           }
-          className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-        />
+          className="w-full  rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0 my-2"
+        >
+          <option value="">كل الأنواع</option>
+          {tableClasses.map((cls) => (
+            <option key={cls} value={cls} className="bg-night">
+              كلاس {cls}
+            </option>
+          ))}
+        </select>
       </label>
 
-
-    </div>
-
-    <label className="text-sm text-white/70">
-      نوع الطاولة (اختياري)
-      <select
-        value={searchForm.tableClass || ""}
-        onChange={(event) =>
-          handleSearchChange(
-            "tableClass",
-            event.target.value as TableClass | undefined
-          )
-        }
-        className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0 my-2"
+      <Button
+        onClick={() => fetchAvailableTables(searchForm)} // هنا بتمرير searchForm للباك
+        loading={loading}
+        className="w-full"
       >
-        <option value="">كل الأنواع</option>
-        {tableClasses.map((cls) => (
-          <option key={cls} value={cls} className="bg-night">
-            كلاس {cls}
-          </option>
-        ))}
-      </select>
-    </label>
-
-    <Button
-      onClick={() => fetchAvailableTables(searchForm)} // هنا بتمرير searchForm للباك
-      loading={loading}
-      className="w-full"
-    >
-      بحث عن طاولات متاحة
-    </Button>
-  </div>
-);
-
+        بحث عن طاولات متاحة
+      </Button>
+    </div>
+  );
 
   const renderAvailableTables = () => {
     if (loading) {
-      return <p className="text-center text-white/70">جاري البحث عن الطاولات...</p>;
+      return (
+        <p className="text-center text-white/70">جاري البحث عن الطاولات...</p>
+      );
     }
 
     if (feedback && feedback.type === "error") {
@@ -909,12 +900,18 @@ const renderSearchForm = () => (
     }
 
     if (availableTables.length === 0) {
-      return <p className="text-center text-white/70">لا توجد طاولات متاحة حاليًا بالمعايير المحددة.</p>;
+      return (
+        <p className="text-center text-white/70">
+          لا توجد طاولات متاحة حاليًا بالمعايير المحددة.
+        </p>
+      );
     }
 
     return (
       <div className="space-y-6">
-        <h3 className="text-2xl font-semibold text-white">الطاولات المتاحة ({availableTables.length})</h3>
+        <h3 className="text-2xl font-semibold text-white">
+          الطاولات المتاحة ({availableTables.length})
+        </h3>
         <div className="grid gap-6 md:grid-cols-2">
           {availableTables.map((table) => (
             <TableCard
@@ -929,159 +926,166 @@ const renderSearchForm = () => (
     );
   };
 
-const renderConfirmationForm = () => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    className="glass-sheen rounded-3xl p-10 space-y-6"
-  >
-    <SectionHeading
-      align="right"
-      eyebrow="تأكيد الحجز"
-      title={`تأكيد حجز الطاولة ${selectedTable?.name}`}
-      description="يرجى إدخال بياناتك لتأكيد الحجز."
-    />
+  const renderConfirmationForm = () => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="glass-sheen rounded-3xl p-10 space-y-6"
+    >
+      <SectionHeading
+        align="right"
+        eyebrow="تأكيد الحجز"
+        title={`تأكيد حجز الطاولة ${selectedTable?.name}`}
+        description="يرجى إدخال بياناتك لتأكيد الحجز."
+      />
 
-    <form onSubmit={handleConfirmReservation} className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* الاسم */}
-        <label className="space-y-2 text-sm text-white/70">
-          الاسم
-          <input
-            type="text"
-            required
-            value={reservationForm.name}
-            onChange={(e) => handleReservationFormChange("name", e.target.value)}
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-          />
-        </label>
+      <form onSubmit={handleConfirmReservation} className="space-y-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* الاسم */}
+          <label className="space-y-2 text-sm text-white/70">
+            الاسم
+            <input
+              type="text"
+              required
+              value={reservationForm.name}
+              onChange={(e) =>
+                handleReservationFormChange("name", e.target.value)
+              }
+              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            />
+          </label>
 
-        {/* الايميل */}
-        <label className="space-y-2 text-sm text-white/70">
-          الايميل
-          <input
-            type="email"
-            required
-            value={reservationForm.email}
-            onChange={(e) => handleReservationFormChange("email", e.target.value)}
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-          />
-        </label>
-      </div>
+          {/* الايميل */}
+          <label className="space-y-2 text-sm text-white/70">
+            الايميل
+            <input
+              type="email"
+              required
+              value={reservationForm.email}
+              onChange={(e) =>
+                handleReservationFormChange("email", e.target.value)
+              }
+              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            />
+          </label>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* رقم الهاتف */}
-        <label className="space-y-2 text-sm text-white/70">
-          رقم الهاتف
-          <input
-            type="tel"
-            required
-            value={reservationForm.phone}
-            onChange={(e) => handleReservationFormChange("phone", e.target.value)}
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-          />
-        </label>
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* رقم الهاتف */}
+          <label className="space-y-2 text-sm text-white/70">
+            رقم الهاتف
+            <input
+              type="tel"
+              required
+              value={reservationForm.phone}
+              onChange={(e) =>
+                handleReservationFormChange("phone", e.target.value)
+              }
+              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            />
+          </label>
 
-        {/* عدد الأفراد */}
-        <label className="space-y-2 text-sm text-white/70">
-          عدد الأفراد
-          <input
-            type="number"
-            min={1}
-            max={selectedTable?.maxSeats || 12}
-            required
-            value={reservationForm.guests}
-            onChange={(e) =>
-              handleReservationFormChange("guests", Number(e.target.value))
-            }
-            className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-          />
-        </label>
-      </div>
+          {/* عدد الأفراد */}
+          <label className="space-y-2 text-sm text-white/70">
+            عدد الأفراد
+            <input
+              type="number"
+              min={1}
+              max={selectedTable?.maxSeats || 12}
+              required
+              value={reservationForm.guests}
+              onChange={(e) =>
+                handleReservationFormChange("guests", Number(e.target.value))
+              }
+              className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            />
+          </label>
+        </div>
 
-      {/* اختيار الوقت */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <label className="text-sm text-white/70">
-          من وقت
-          <select
-            required
-            value={reservationForm.timeStart}
-            onChange={(e) =>
-              handleReservationFormChange("timeStart", e.target.value)
-            }
-            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
-          >
-            {timeSlots.map((slot) => (
-              <option key={slot} value={slot} className="bg-night">
-                {slot}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="text-sm text-white/70">
-          إلى وقت
-          <select
-            required
-            value={reservationForm.timeEnd}
-            onChange={(e) =>
-              handleReservationFormChange("timeEnd", e.target.value)
-            }
-            className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
-          >
-            {timeSlots
-              .filter((slot) => {
-                if (!reservationForm.timeStart) return true;
-                const startMinutes = timeToMinutes(reservationForm.timeStart);
-                const slotMinutes = timeToMinutes(slot);
-                return slotMinutes > startMinutes;
-              })
-              .map((slot) => (
+        {/* اختيار الوقت */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <label className="text-sm text-white/70">
+            من وقت
+            <select
+              required
+              value={reservationForm.timeStart}
+              onChange={(e) =>
+                handleReservationFormChange("timeStart", e.target.value)
+              }
+              className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
+            >
+              {timeSlots.map((slot) => (
                 <option key={slot} value={slot} className="bg-night">
                   {slot}
                 </option>
               ))}
-          </select>
+            </select>
+          </label>
+
+          <label className="text-sm text-white/70">
+            إلى وقت
+            <select
+              required
+              value={reservationForm.timeEnd}
+              onChange={(e) =>
+                handleReservationFormChange("timeEnd", e.target.value)
+              }
+              className="w-full my-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white focus:border-accent/60 focus:outline-none focus:ring-0"
+            >
+              {timeSlots
+                .filter((slot) => {
+                  if (!reservationForm.timeStart) return true;
+                  const startMinutes = timeToMinutes(reservationForm.timeStart);
+                  const slotMinutes = timeToMinutes(slot);
+                  return slotMinutes > startMinutes;
+                })
+                .map((slot) => (
+                  <option key={slot} value={slot} className="bg-night">
+                    {slot}
+                  </option>
+                ))}
+            </select>
+          </label>
+        </div>
+
+        {/* ملاحظات */}
+        <label className="space-y-2 text-sm text-white/70">
+          ملاحظات (اختياري)
+          <textarea
+            rows={3}
+            value={reservationForm.message}
+            onChange={(e) =>
+              handleReservationFormChange("message", e.target.value)
+            }
+            className="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
+            placeholder="احكي لنا عن أي احتياجات أكل، مناسبات، أو أي طلبات خاصة عندك."
+          />
         </label>
-      </div>
 
-      {/* ملاحظات */}
-      <label className="space-y-2 text-sm text-white/70">
-        ملاحظات (اختياري)
-        <textarea
-          rows={3}
-          value={reservationForm.message}
-          onChange={(e) => handleReservationFormChange("message", e.target.value)}
-          className="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
-          placeholder="احكي لنا عن أي احتياجات أكل، مناسبات، أو أي طلبات خاصة عندك."
-        />
-      </label>
+        {/* رسالة الفيدباك */}
+        {feedback && (
+          <p
+            className={clsx(
+              "text-sm",
+              feedback.type === "success" ? "text-emerald-400" : "text-red-400"
+            )}
+          >
+            {feedback.message}
+          </p>
+        )}
 
-      {/* رسالة الفيدباك */}
-      {feedback && (
-        <p
-          className={clsx(
-            "text-sm",
-            feedback.type === "success" ? "text-emerald-400" : "text-red-400"
-          )}
-        >
-          {feedback.message}
-        </p>
-      )}
-
-      {/* أزرار */}
-      <div className="flex space-x-4 rtl:space-x-reverse">
-        <Button type="submit" loading={loading} className="flex-1">
-          تأكيد الحجز
-        </Button>
-        <Button type="button" onClick={() => setIsConfirming(false)}>
-          إلغاء
-        </Button>
-      </div>
-    </form>
-  </motion.div>
-);
-
+        {/* أزرار */}
+        <div className="flex space-x-4 rtl:space-x-reverse">
+          <Button type="submit" loading={loading} className="flex-1">
+            تأكيد الحجز
+          </Button>
+          <Button type="button" onClick={() => setIsConfirming(false)}>
+            إلغاء
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
 
   const renderMyReservations = () => {
     if (loading) {
@@ -1089,7 +1093,9 @@ const renderConfirmationForm = () => (
     }
 
     if (userReservations.length === 0) {
-      return <p className="text-center text-white/70">لم تقم بأي حجوزات بعد.</p>;
+      return (
+        <p className="text-center text-white/70">لم تقم بأي حجوزات بعد.</p>
+      );
     }
 
     return (
@@ -1104,7 +1110,8 @@ const renderConfirmationForm = () => (
               !!(
                 cancelLoading &&
                 cancellingReservation &&
-                getReservationId(cancellingReservation) === getReservationId(reservation)
+                getReservationId(cancellingReservation) ===
+                  getReservationId(reservation)
               )
             }
           />
@@ -1120,9 +1127,9 @@ const renderConfirmationForm = () => (
       className="glass-sheen rounded-3xl p-10 space-y-6"
     >
       <SectionHeading
-      align="right"
+        align="right"
         eyebrow="تعديل الحجز"
-        title={`تعديل حجز الطاولة ${editingReservation?.tableId}`}
+        title={`تعديل حجز الطاولة `}
         description="يمكنك تعديل عدد الأفراد أو الملاحظات."
       />
       <form onSubmit={handleUpdateReservation} className="space-y-6">
@@ -1145,7 +1152,10 @@ const renderConfirmationForm = () => (
               required
               value={reservationForm.guests}
               onChange={(event) =>
-                handleReservationFormChange("guests", Number(event.target.value))
+                handleReservationFormChange(
+                  "guests",
+                  Number(event.target.value)
+                )
               }
               className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-white placeholder:text-white/40 focus:border-accent/60 focus:outline-none focus:ring-0"
             />
@@ -1177,10 +1187,7 @@ const renderConfirmationForm = () => (
           <Button type="submit" loading={loading} className="flex-1">
             حفظ التعديلات
           </Button>
-          <Button
-            type="button"
-            onClick={() => setEditingReservation(null)}
-          >
+          <Button type="button" onClick={() => setEditingReservation(null)}>
             إلغاء
           </Button>
         </div>
@@ -1247,16 +1254,16 @@ const renderConfirmationForm = () => (
                   transition={{ duration: 0.3 }}
                   className="space-y-8"
                 >
-                  {isConfirming && selectedTable
-                    ? renderConfirmationForm()
-                    : (
-                      <>
-                        {renderSearchForm()}
-                        <div className="pt-4 border-t border-white/10">
-                          {renderAvailableTables()}
-                        </div>
-                      </>
-                    )}
+                  {isConfirming && selectedTable ? (
+                    renderConfirmationForm()
+                  ) : (
+                    <>
+                      {renderSearchForm()}
+                      <div className="pt-4 border-t border-white/10">
+                        {renderAvailableTables()}
+                      </div>
+                    </>
+                  )}
                 </motion.div>
               )}
 
@@ -1332,7 +1339,9 @@ const renderConfirmationForm = () => (
         {cancellingReservation && (
           <CancelConfirmationModal
             reservation={cancellingReservation}
-            onConfirm={() => handleCancelReservation(getReservationId(cancellingReservation))}
+            onConfirm={() =>
+              handleCancelReservation(getReservationId(cancellingReservation))
+            }
             onCancel={hideCancelConfirmation}
             loading={cancelLoading}
           />

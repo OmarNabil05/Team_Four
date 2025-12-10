@@ -172,7 +172,7 @@ export const HomePage = () => {
               </div>
               <div className="flex flex-1 flex-col gap-4 p-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-[0.3em] text-accent/80">
+                  <span className="text-xs  text-accent/80">
                     {item.category}
                   </span>
                   <div>
@@ -189,7 +189,7 @@ export const HomePage = () => {
                 <p className="text-sm text-white/65">{item.description}</p>
                 <Link
                   to="/menu"
-                  className="mt-auto text-sm uppercase tracking-[0.3em] text-accent transition hover:text-accent/70"
+                  className="mt-auto text-sm  text-accent transition hover:text-accent/70"
                 >
                   اكتشف نكهة المكان ←
                 </Link>
@@ -242,7 +242,6 @@ export const HomePage = () => {
 
       <section className="mx-auto mt-24 max-w-6xl px-6 lg:px-10">
         <div className="glass-sheen relative overflow-hidden rounded-3xl p-10">
-          <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[url('https://images.unsplash.com/photo-1532634896-26909d0d4b3e?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center opacity-40 lg:block" />
           <div className="relative max-w-2xl space-y-6">
             <SectionHeading
               align="right"

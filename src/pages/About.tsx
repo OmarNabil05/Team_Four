@@ -69,10 +69,10 @@ export const AboutPage = () => {
         </div>
 
         <div className="relative mx-auto flex min-h-[60vh] max-w-5xl flex-col justify-center gap-6 px-6 py-24 lg:px-10">
-          <p className="text-xl uppercase tracking-[0.4em] text-accent">
+          <p className="text-xl  text-accent">
             قصتنا
           </p>
-          <h1 className="text-5xl tracking-wide text-white sm:text-6xl">
+          <h1 className="text-5xl  text-white sm:text-6xl">
             روح Spot
           </h1>
           <p className="max-w-2xl text-base text-white/70">

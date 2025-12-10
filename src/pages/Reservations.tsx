@@ -40,6 +40,14 @@ export const fetchAvailableTables = async (
     return true;
   });
 };
+type ReservationView = Reservation & {
+  _id?: string;
+  table?: { _id: string; name: string };
+  timeEnd?: string;
+  durationMinutes?: number;
+  guests?: number;
+  status: "pending" | "confirmed" | "cancelled" | "completed" | "accepted" | "refused";
+};
 
 // Helper component for the Table Card
 const TableCard = ({
@@ -124,16 +132,16 @@ const UserReservationCard = ({
       <span
         className={clsx(
           "px-3 py-1 text-xs font-medium rounded-full",
-          reservation.status === "confirmed" &&
+          (reservation.status === "confirmed" || reservation.status === "accepted") &&
             "bg-emerald-500/20 text-emerald-400",
           reservation.status === "pending" &&
             "bg-yellow-500/20 text-yellow-400",
-          reservation.status === "cancelled" && "bg-red-500/20 text-red-400"
+          (reservation.status === "cancelled" || reservation.status === "refused") && "bg-red-500/20 text-red-400"
         )}
       >
-        {reservation.status === "confirmed" && "مؤكد"}
+        {(reservation.status === "confirmed" || reservation.status === "accepted") && "مقبول"}
         {reservation.status === "pending" && "قيد الانتظار"}
-        {reservation.status === "cancelled" && "ملغي"}
+        {(reservation.status === "cancelled" || reservation.status === "refused") && "ملغي"}
         {reservation.status === "completed" && "مكتمل"}
       </span>
     </div>
@@ -167,22 +175,26 @@ const UserReservationCard = ({
 
     {/* Actions */}
     <div className="flex space-x-2 rtl:space-x-reverse pt-2">
-      <Button className="flex-1" onClick={() => onEdit(reservation)}>
-        <FaPen />
-        تعديل
-      </Button>
-
-      {reservation.status !== "cancelled" && (
-        <Button
-          variant="outline"
-          onClick={() => onCancel(reservation)}
-          loading={cancelLoading}
+      {reservation.status !== "cancelled" &&
+        reservation.status !== "completed" &&
+        reservation.status !== "refused"
+ ? (
+          <>
+            <Button className="flex-1" onClick={() => onEdit(reservation)}>
+              <FaPen />
+              تعديل
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => onCancel(reservation)}
+              loading={cancelLoading}
           className="text-red-400 border-red-400 hover:bg-red-400/10"
         >
           <FaTrash className="w-4 h-4 ml-2" />
           إلغاء
         </Button>
-      )}
+          </>
+        ) : null}
     </div>
   </motion.div>
 );
@@ -354,13 +366,6 @@ type ReservationFormData = {
   tableClass?: TableClass;
 };
 
-type ReservationView = Reservation & {
-  _id?: string;
-  table?: { _id: string; name: string };
-  timeEnd?: string;
-  durationMinutes?: number;
-  guests?: number;
-};
 
 const getReservationId = (reservation: ReservationView) =>
   reservation.id ?? reservation._id ?? "";
